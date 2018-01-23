@@ -1,0 +1,10 @@
+length 1          #[m]
+MeshPoints 10
+Tin 293.1           #[C]
+Pressure 15.51     #[MPa]
+MassFlux 3807     #[kg/m2/s]
+CladOR 0.00475    #[m]
+Pitch 0.0126      #[m]
+
+# Appendix K of Trodreas
+
