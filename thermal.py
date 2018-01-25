@@ -43,7 +43,8 @@ class Thermal():
 		self.Tw = np.zeros(self.zMesh)
 		self.Tw_updated = np.zeros(self.zMesh)
 		self.velocity = np.zeros(self.zMesh)
-		self.LinPower[:] = q
+		self.LinPower = np.zeros(self.zMesh)
+		self.LinPower[:] = q #if q is an array, this line must be modified
 		count = np.zeros(self.zMesh)
 		HeatFlux[:] = self.LinPower[:]/(2*np.pi*options.CladOR)
 
@@ -118,8 +119,8 @@ class Thermal():
 		print(self.Tbulk)
 		print("Temperature at the wall [K]:")
 		print(self.Tw)
-		print("Number of interations a each node:")
-		print(count)
+		# print("Number of interations a each node:")
+		# print(count)
 		# print("Water velocity [m/s]:")
 		# print(self.velocity)
 		# print("Total pressure change between inlet/outlet: %f [Pa]" % P_sum)
