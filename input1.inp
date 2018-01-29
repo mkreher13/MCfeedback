@@ -1,10 +1,31 @@
-length 1.         #[m]
-MeshPoints 10
+length 4.         #[m]
+MeshPoints 10 
 Tin 566.25        #[K]
 Pressure 15.51    #[MPa]
 MassFlux 3807.    #[kg/m2/s]
 CladOR 0.00475    #[m]
 Pitch 0.0126      #[m]
+
+# Axial location of spacer grid 
+
+SpacerGrid 37.1621 #bottom
+SpacerGrid 40.5200 #top
+SpacerGrid 98.0250 #bottom
+SpacerGrid 103.740 #top
+SpacerGrid 150.222 #bottom
+SpacerGrid 155.937 #top
+SpacerGrid 202.419 #bottom
+SpacerGrid 208.134 #top
+SpacerGrid 254.616 #bottom
+SpacerGrid 260.331 #top
+SpacerGrid 306.813 #bottom
+SpacerGrid 312.528 #top
+SpacerGrid 359.010 #bottom
+SpacerGrid 364.725 #top
+# Inactive fuel spacer grid not included
+
+
+
 
 # Appendix K of Trodreas
 

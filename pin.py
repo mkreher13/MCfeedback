@@ -1,7 +1,10 @@
-# Last edited by Miriam Rathbun on 11/23/2017
+# Last edited by Miriam Rathbun on 01/29/2018
 # OpenMC model of fuel pin & water cell
 
+# Before running for the first time: export PYTHONPATH=~/Desktop/MCFeedback/iapws:$PYTHONPATH
+
 from thermal import *
+from power import *
 
 ###############################################################################
 #                      Simulation Input File Parameters
@@ -11,6 +14,7 @@ from thermal import *
 
 options = ThermalOpts()
 options.read('input1.inp')
+
 
 # Channel calculated parameters
 
@@ -23,12 +27,16 @@ De = 4*A/(2*np.pi*options.CladOR)
 ###############################################################################
 
 
+
 T=Thermal()
-T.var(options)
-T.HTC(options, A, De)
+T.Mesh(options)
+
+P=Power()
+P.Initial(options, T.Mesh)
+
+T.HTC(options, A, De, P.LinPower)
 
 
-# Next step: map out calculations with meshing (zMesh)
 
 
 

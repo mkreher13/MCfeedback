@@ -1,10 +1,14 @@
 # Class to perform thermal analysis and compute heat transfer coeficient
-# Last modified by Miriam Rathbun on 12/12/2017
+# Last modified by Miriam Rathbun on 01/29/2018
 
-# Currently single-phase
+# Assumptions:
+# subcooled boiling at wall
+# modified Chen correlation (eq.13-19 in Todreas)
 
+import math
 import numpy as np 
 import scipy.linalg
+import matplotlib.pyplot as plt
 from thermalOpts import *
 from iapws import IAPWS97
 
@@ -18,35 +22,43 @@ class Thermal():
 
 ###############################################################
 
-	def var(self, options):
+	def Mesh(self, options):
 
-		self.zMesh = options.MeshPoints
+		L = options.length
+		UnifMesh = np.linspace(0,L*100,options.MeshPoints)
+
+		# x_axisG = np.zeros(len(options.Grids))
+		# x_axisM = np.zeros(len(UnifMesh))
+		# plt.scatter(x_axisG,options.Grids, c = "r", marker = "_")
+		# plt.scatter(x_axisM,UnifMesh, c = "b", marker = "_")
+		# plt.show()
+
+		self.Mesh = sorted(np.insert(options.Grids,0,UnifMesh))
+
+		
 
 ###############################################################
 
-	def HTC(self, options, A, De):
+	def HTC(self, options, A, De, LinPower):
 
+		L = options.length
 		P = options.Pressure
 		Tin = options.Tin
 		G = options.G
-		L = options.length
-		q = 17860 #np.array([17810., 17820., 17830., 17840., 17850., 17860., 17850., 17840., 17830., 17820.]) #[W/m]
-
+		
 		subcooled_liq = IAPWS97(T=Tin, x=0)
 		sat_liq = IAPWS97(P=P, x=0)
 		sat_steam = IAPWS97(P=P, x=1)
 		Tsat = sat_liq.T
 
-		HeatFlux = np.zeros(self.zMesh)
-		self.enthalpy = np.zeros(self.zMesh)
-		self.Tbulk = np.zeros(self.zMesh)
-		self.Tw = np.zeros(self.zMesh)
-		self.Tw_updated = np.zeros(self.zMesh)
-		self.velocity = np.zeros(self.zMesh)
-		self.LinPower = np.zeros(self.zMesh)
-		self.LinPower[:] = q #if q is an array, this line must be modified
-		count = np.zeros(self.zMesh)
-		HeatFlux[:] = self.LinPower[:]/(2*np.pi*options.CladOR)
+		HeatFlux = np.zeros(len(self.Mesh))
+		self.enthalpy = np.zeros(len(self.Mesh))
+		self.Tbulk = np.zeros(len(self.Mesh))
+		self.Tw = np.zeros(len(self.Mesh))
+		self.Tw_updated = np.zeros(len(self.Mesh))
+		self.velocity = np.zeros(len(self.Mesh))
+		count = np.zeros(len(self.Mesh))
+		HeatFlux[:] = LinPower[:]/(2*np.pi*options.CladOR)
 
 
 
@@ -54,19 +66,20 @@ class Thermal():
 
 		P_sum = 0
 
-		for i in range(0,self.zMesh):
+		for i in range(0,len(self.Mesh)):
 
 			E = 1000.
 
 			if i == 0:
-				self.enthalpy[i-1] = subcooled_liq.h
-				self.Tbulk[i-1] = Tin
-				self.Tw[i-1] = Tin
-				liq = subcooled_liq
+				self.enthalpy[i] = subcooled_liq.h
+				self.Tbulk[i] = Tin
+				self.Tw[i] = Tin
+			else:
+				MeshStep = (self.Mesh[i]-self.Mesh[i-1])/100 # Converted to meters
+				self.Tw[i] = self.Tw[i-1]
+				self.enthalpy[i] = LinPower[i]/1000*MeshStep/(G*A) + self.enthalpy[i-1]
+				self.Tbulk[i] = (self.enthalpy[i]-self.enthalpy[i-1])/(liq.cp) + self.Tbulk[i-1]
 
-			self.Tw[i] = self.Tw[i-1]
-			self.enthalpy[i] = self.LinPower[i]/1000*L/self.zMesh/(G*A) + self.enthalpy[i-1]
-			self.Tbulk[i] = (self.enthalpy[i]-self.enthalpy[i-1])/(liq.cp) + self.Tbulk[i-1]
 			liq = IAPWS97(T=self.Tbulk[i], x=0)
 			stm = IAPWS97(T=self.Tbulk[i], x=1)
 			Re = G*De/liq.mu
@@ -77,7 +90,7 @@ class Thermal():
 
 
 			# Converging to Tw (wall temperature)
-			while E > 1E-20:
+			while E > 1E-3:
 				Tw_water = IAPWS97(T=self.Tw[i], x=0)
 				HTC_nb = S*0.00122*(liq.k**0.79)*((liq.cp*1000)**0.45)*(liq.rho**0.49)/(liq.sigma**0.5)/(liq.mu**0.29)/((stm.h-liq.h)**0.24)/(stm.rho**0.24)*(abs(self.Tw[i]-Tsat)**0.24)*(abs(Tw_water.P-P)**0.75)
 				self.Tw_updated[i] = (HeatFlux[i]+self.Tbulk[i]*HTC_c+Tsat*HTC_nb)/(HTC_c+HTC_nb)
@@ -85,29 +98,32 @@ class Thermal():
 				self.Tw[i] = self.Tw_updated[i]
 				count[i] = count[i]+1
 
+			if i != 0:
 
-			# Conservation equations
-			rho_top = IAPWS97(T=self.Tbulk[i], x=0).rho
-			rho_bot = IAPWS97(T=self.Tbulk[i-1], x=0).rho
 
-			# Mass
-			self.velocity[i] = G/rho_top
 
-			# Energy - used to calculate enthaply, so no need to check. 
-			# a = G*(self.enthalpy[i]-self.enthalpy[i-1])/(L/self.zMesh)
-			# b = self.LinPower[i]/1000/A
-			# print a-b
+				# Conservation equations
+				rho_top = IAPWS97(T=self.Tbulk[i], x=0).rho
+				rho_bot = IAPWS97(T=self.Tbulk[i-1], x=0).rho
 
-			# Momentum 
-			acc = G**2*(1/rho_top-1/rho_bot)
-			f = 0.184/Re**0.2
-			fric = f*G**2/De/2/((rho_top+rho_bot)/2)*L/self.zMesh
-			grav = 9.81*(rho_top+rho_bot)/2*L/self.zMesh
-			deltaP = acc + fric + grav
-			P_sum = P_sum + deltaP
+				# Mass
+				self.velocity[i] = G/rho_top
+
+				# Energy - used to calculate enthaply, so no need to check. 
+				# a = G*(self.enthalpy[i]-self.enthalpy[i-1])/MeshStep
+				# b = LinPower[i]/1000/A
+				# print a-b
+
+				# Momentum 
+				acc = G**2*(1/rho_top-1/rho_bot)
+				f = 0.184/Re**0.2
+				fric = f*G**2/De/2/((rho_top+rho_bot)/2)*MeshStep
+				grav = 9.81*(rho_top+rho_bot)/2*MeshStep
+				deltaP = acc + fric + grav
+				P_sum = P_sum + deltaP
 				
 
-		rho_out = IAPWS97(T=self.Tbulk[self.zMesh-1], x=0).rho
+		rho_out = IAPWS97(T=self.Tbulk[len(self.Mesh)-1], x=0).rho
 		rho_in = subcooled_liq.rho
 		totalP = G**2*(1/rho_out-1/rho_in) + f*G**2/De/2/((rho_out+rho_in)/2)*L + 9.81*(rho_out+rho_in)/2*L 
 		# print("Total pressure change between inlet/outlet: %f [Pa]" % totalP)
@@ -129,7 +145,7 @@ class Thermal():
 		##################
 		# Fuel Temperature
 
-		self.Tf = np.zeros(self.zMesh)
+		self.Tf = np.zeros(len(self.Mesh))
 		kf = 2.4             #[W/m/K]
 		kc = 17.             #[W/m/K]
 		hg = 31000.          #[W/m^2/K]
@@ -138,7 +154,7 @@ class Thermal():
 		fuel_or = 0.0039218  #[m]
 		gap_r = (clad_ir+fuel_or)/2 
 
-		self.Tf[:] = self.Tw[:] + self.LinPower[:]/2.0/np.pi*(1.0/4.0/kf+1/gap_r/hg+1/kc*np.log(clad_or/clad_ir))
+		self.Tf[:] = self.Tw[:] + LinPower[:]/2.0/np.pi*(1.0/4.0/kf+1/gap_r/hg+1/kc*np.log(clad_or/clad_ir))
 
 		print("Temperature in the fuel [K]:")
 		print(self.Tf)
@@ -147,7 +163,4 @@ class Thermal():
 
 
 ###############################################################
-# Tw is found with eq.13-19 in Todreas
-
-
 #end class
