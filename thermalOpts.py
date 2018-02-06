@@ -1,6 +1,7 @@
 # Parsing input file
-# Last edited by Miriam Rathbun on 12/11/2017
+# Last edited by Miriam Rathbun on 02/06/2018
 
+import numpy as np
 
 class ThermalOpts:
 
@@ -11,6 +12,8 @@ class ThermalOpts:
 	def read(self, filename):
 
 		inpFile = open(filename, 'r')
+
+		SpacingList = []
 
 
 		for line in inpFile:
@@ -27,11 +30,8 @@ class ThermalOpts:
 
 
 			keyword, arguments = line.split(' ',1)
-			if keyword == 'length':
-				self.length = float(arguments)
-
-			elif keyword == 'MeshPoints':
-				self.MeshPoints = int(arguments)
+			if keyword == 'MaxMesh':
+				self.MaxMesh = float(arguments)
 
 			elif keyword == 'Tin':
 				self.Tin = float(arguments)
@@ -45,8 +45,14 @@ class ThermalOpts:
 			elif keyword == 'CladOR':
 				self.CladOR = float(arguments)
 
-			elif keyword == 'Pitch':
-				self.Pitch = float(arguments)
+			elif keyword == 'PinPitch':
+				self.PinPitch = float(arguments)
+
+			elif keyword == 'Active' or keyword == 'Grid':
+				SpacingList.append(float(arguments))
 
 			else:
 				continue
+
+		self.Spacing = np.array(SpacingList)
+
