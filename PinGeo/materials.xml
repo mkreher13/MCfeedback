@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<materials>
+  <material id="1" name="UO2 fuel at 2.4% wt enrichment">
+    <density units="g/cm3" value="10.29769" />
+    <nuclide ao="0.000195228963656" name="U234" />
+    <nuclide ao="0.0242994854973" name="U235" />
+    <nuclide ao="0.975505285539" name="U238" />
+    <nuclide ao="1.999242" name="O16" />
+    <nuclide ao="0.000758" name="O17" />
+  </material>
+  <material id="2" name="Helium for gap">
+    <density units="g/cm3" value="0.001598" />
+    <nuclide ao="4.8088e-10" name="He3" />
+    <nuclide ao="0.00024043951912" name="He4" />
+  </material>
+  <material id="3" name="Zircaloy 4">
+    <density units="g/cm3" value="6.55" />
+    <nuclide name="Sn112" wo="0.000128015000152" />
+    <nuclide name="Sn114" wo="8.86581344319e-05" />
+    <nuclide name="Sn115" wo="4.60735744246e-05" />
+    <nuclide name="Sn116" wo="0.00198744304488" />
+    <nuclide name="Sn117" wo="0.00105883191729" />
+    <nuclide name="Sn118" wo="0.00336770607681" />
+    <nuclide name="Sn119" wo="0.00120455720989" />
+    <nuclide name="Sn120" wo="0.00460700365058" />
+    <nuclide name="Sn122" wo="0.000665636739161" />
+    <nuclide name="Sn124" wo="0.000846074652374" />
+    <nuclide name="Fe54" wo="9.31517107303e-05" />
+    <nuclide name="Fe56" wo="0.00151637522475" />
+    <nuclide name="Fe57" wo="3.5646082178e-05" />
+    <nuclide name="Fe58" wo="4.82698233981e-06" />
+    <nuclide name="Cr50" wo="4.17368647311e-05" />
+    <nuclide name="Cr52" wo="0.000836993624258" />
+    <nuclide name="Cr53" wo="9.67358688151e-05" />
+    <nuclide name="Cr54" wo="2.45336421961e-05" />
+    <nuclide name="Zr90" wo="0.498618607086" />
+    <nuclide name="Zr91" wo="0.109947257486" />
+    <nuclide name="Zr92" wo="0.169904211782" />
+    <nuclide name="Zr94" wo="0.175932173717" />
+    <nuclide name="Zr96" wo="0.0289477499293" />
+  </material>
+  <material id="4" name="Borated water">
+    <density units="g/cm3" value="0.740582" />
+    <nuclide ao="7.928e-06" name="B10" />
+    <nuclide ao="3.2072e-05" name="B11" />
+    <nuclide ao="0.049992213" name="H1" />
+    <nuclide ao="7.787e-06" name="H2" />
+    <nuclide ao="0.023990904" name="O16" />
+    <nuclide ao="9.096e-06" name="O17" />
+    <sab name="c_H_in_H2O" />
+  </material>
+</materials>
