@@ -45,9 +45,6 @@ class Channel():
 		plt.savefig('Mesh.png')
 
 
-
-		
-
 ###############################################################
 
 	def HTC(self, opt, LinPower):
