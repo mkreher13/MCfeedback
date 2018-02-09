@@ -1,5 +1,5 @@
 # Class to perform thermal analysis and compute heat transfer coeficient
-# Last modified by Miriam Rathbun on 02/06/2018
+# Last modified by Miriam Rathbun on 02/09/2018
 
 # Assumptions:
 # subcooled boiling at wall
@@ -9,7 +9,6 @@ import math
 import numpy as np 
 import scipy.linalg
 import matplotlib.pyplot as plt
-from thermalOpts import *
 from iapws import IAPWS97
 
 
@@ -22,19 +21,19 @@ class Channel():
 
 ###############################################################
 
-	def Mesh(self, options):
+	def Mesh(self, opt):
 
 		TempMesh = [0.]
 		
-		for i in range(0,len(options.Spacing)):
-			NextMeshPoint = TempMesh[len(TempMesh)-1] + options.Spacing[i]
+		for i in range(0,len(opt.Spacing)):
+			NextMeshPoint = TempMesh[len(TempMesh)-1] + opt.Spacing[i]
 			TempMesh.append(NextMeshPoint)
 
 		self.Mesh = TempMesh
 
 		for i in range(0,len(TempMesh)-1):
-			if options.Spacing[i] >= options.MaxMesh:
-				UnifStep = np.ceil((TempMesh[i+1]-TempMesh[i])/options.MaxMesh)+2
+			if opt.Spacing[i] >= opt.MaxMesh:
+				UnifStep = np.ceil((TempMesh[i+1]-TempMesh[i])/opt.MaxMesh)+2
 				UnifMesh1 = np.linspace(TempMesh[i],TempMesh[i+1],UnifStep)
 				UnifMesh2 = np.delete(UnifMesh1,0)
 				UnifMesh3 = np.delete(UnifMesh2,len(UnifMesh2)-1)
@@ -46,21 +45,22 @@ class Channel():
 		plt.savefig('Mesh.png')
 
 
+
 		
 
 ###############################################################
 
-	def HTC(self, options, LinPower):
+	def HTC(self, opt, LinPower):
 
 		L = (self.Mesh[len(self.Mesh)-1]-self.Mesh[0])/100 # Conversion to meters
-		P = options.Pressure
-		Tin = options.Tin
-		G = options.G
-		A = options.PinPitch**2-np.pi*options.CladOR**2
+		P = opt.Pressure
+		Tin = opt.Tin
+		G = opt.G
+		A = opt.PinPitch**2-np.pi*opt.CladOR**2
 		Area = np.zeros(len(self.Mesh))
 		Area[:] = A # Should populate with new areas for the grid spacer locations
-		De_avg = 4*A/(2*np.pi*options.CladOR+options.PinPitch**2)
-		De = 4*Area[:]/(2*np.pi*options.CladOR+options.PinPitch**2) # Should populate with new De for the grid spacer locations
+		De_avg = 4*A/(2*np.pi*opt.CladOR+opt.PinPitch**2)
+		De = 4*Area[:]/(2*np.pi*opt.CladOR+opt.PinPitch**2) # Should populate with new De for the grid spacer locations
 		
 		subcooled_liq = IAPWS97(T=Tin, x=0)
 		sat_liq = IAPWS97(P=P, x=0)
@@ -74,7 +74,7 @@ class Channel():
 		self.Tw_updated = np.zeros(len(self.Mesh))
 		self.velocity = np.zeros(len(self.Mesh))
 		count = np.zeros(len(self.Mesh))
-		HeatFlux[:] = LinPower[:]/(2*np.pi*options.CladOR)
+		HeatFlux[:] = LinPower[:]/(2*np.pi*opt.CladOR)
 
 
 
@@ -103,6 +103,8 @@ class Channel():
 			Nu = 0.023*(Re**0.8)*(Pr**0.4)
 			HTC_c = Nu*liq.k/De[i]
 			S = 1/(1.+2.53E-6*Re**1.17)
+
+
 
 
 			# Converging to Tw (wall temperature)
@@ -135,6 +137,7 @@ class Channel():
 				grav = 9.81*(rho_top+rho_bot)/2*MeshStep
 				deltaP = acc + fric + grav
 				P_sum = P_sum + deltaP
+
 				
 
 		rho_out = IAPWS97(T=self.Tbulk[len(self.Mesh)-1], x=0).rho
@@ -164,12 +167,8 @@ class Channel():
 		kf = 2.4             #[W/m/K]
 		kc = 17.             #[W/m/K]
 		hg = 31000.          #[W/m^2/K]
-		clad_or = 0.00475    #[m]
-		clad_ir = 0.0040005  #[m]
-		fuel_or = 0.0039218  #[m]
-		gap_r = (clad_ir+fuel_or)/2 
 
-		self.Tf[:] = self.Tw[:] + LinPower[:]/2.0/np.pi*(1.0/4.0/kf+1/gap_r/hg+1/kc*np.log(clad_or/clad_ir))
+		self.Tf[:] = self.Tw[:] + LinPower[:]/2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
 
 		# print("Temperature in the fuel [K]:")
 		# print(self.Tf)

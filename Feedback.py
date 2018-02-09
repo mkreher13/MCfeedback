@@ -1,8 +1,9 @@
-# Last edited by Miriam Rathbun on 02/06/2018
+# Last edited by Miriam Rathbun on 02/09/2018
 # OpenMC model of fuel pin & water cell
 
 # Before running for the first time: export PYTHONPATH=~/Desktop/MCFeedback/iapws:$PYTHONPATH
 
+from ModelOpts import *
 from Channel import *
 from Power import *
 
@@ -12,7 +13,7 @@ from Power import *
 
 # Reading input parameters
 
-options = ThermalOpts()
+options = ModelOpts()
 options.read('input1.inp')
 
 

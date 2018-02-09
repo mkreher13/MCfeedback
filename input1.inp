@@ -1,10 +1,20 @@
-# Appendix K of Trodreas & BEAVRS Benchmark
+#################################################
+# Channel Parameters: Appendix K of Trodreas
+#################################################
 
 MaxMesh 10.          #[cm]   
 Tin 566.25           #[K]
 Pressure 15.51       #[MPa]
 MassFlux 3807.       #[kg/m2/s]
+
+
+#################################################
+# Geometry: BEAVRS Benchmark
+#################################################
+
 CladOR 0.004572      #[m]
+CladIR 0.0040005     #[m]
+FuelOR 0.0039218     #[m]
 PinPitch 0.0125984   #[m]
 
 
