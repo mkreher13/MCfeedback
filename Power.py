@@ -1,5 +1,5 @@
 # Class to provide initial linear power
-# Last modified by Miriam Rathbun on 02/09/2018
+# Last modified by Miriam Rathbun on 02/14/2018
 
 import numpy as np
 import shutil
@@ -21,8 +21,12 @@ class Power():
 		#####################################
 
 		q_prime = 17860
+		self.Tf = np.zeros(len(Mesh))
+		self.Tf[:] = opt.Tin
 		self.LinPower = np.zeros(len(Mesh))
 		self.LinPower[:] = q_prime
+
+		# print self.Tf
 
 
 		#####################################
@@ -35,25 +39,24 @@ class Power():
 		Pitch = opt.PinPitch*100 #[cm]
 
 		# Construct uniform initial source distribution over fissionable zones
-		lower_left = [-0.62992, -0.62992, -10.0]
-		upper_right = [+0.62992, +0.62992, +10.0]
-		source = openmc.source.Source(space=openmc.stats.Box(lower_left, upper_right))
-		source.space.only_fissionable = True
-
+		# Something may be wrong here
+		lower_left = [-0.62992, -0.62992, 0]
+		upper_right = [+0.62992, +0.62992, +365.76]
+		uniform_dist = openmc.stats.Box(lower_left, upper_right, only_fissionable=True)
 
 		# Settings file
 		settings_file = openmc.Settings()
-		settings_file.batches = 10
-		settings_file.inactive = 5
+		settings_file.batches = 100
+		settings_file.inactive = 50
 		settings_file.particles = 10000
 		settings_file.output = {'tallies': False}
-		settings_file.source = source
-		settings_file.sourcepoint_write = False
-		settings_file.temperature = {'multipole': True, 'tolerance': 1000}
+		settings_file.temperature = {'multipole': True, 'tolerance': 1000} #need a multipole library
+		settings_file.source = openmc.source.Source(space=uniform_dist)
+		settings_file.seed = 1
 
 		settings_file.export_to_xml()
 
-		# Materials: to be modified
+		# Materials: to be modified for each mesh, add temperature info
 		uo2 = openmc.Material(material_id=1, name='UO2 fuel at 2.4% wt enrichment')
 		uo2.set_density('g/cm3', 10.29769)
 		uo2.add_element('U', 1., enrichment=2.4)
@@ -81,52 +84,104 @@ class Power():
 		materials_file.export_to_xml()
 
 
-		# Geometry file
-		fuel_or = openmc.ZCylinder(surface_id=1, x0=0, y0=0, R=FuelOR, name='Fuel OR')
-		clad_ir = openmc.ZCylinder(surface_id=2, x0=0, y0=0, R=CladIR, name='Clad IR')
-		clad_or = openmc.ZCylinder(surface_id=3, x0=0, y0=0, R=CladOR, name='Clad OR')
-		left = openmc.XPlane(surface_id=4, x0=-Pitch/2, name='left')
-		right = openmc.XPlane(surface_id=5, x0=Pitch/2, name='right')
-		bottom = openmc.YPlane(surface_id=6, y0=-Pitch/2, name='bottom')
-		top = openmc.YPlane(surface_id=7, y0=Pitch/2, name='top')
-		entrance = openmc.ZPlane(surface_id=8, z0=0, name='entrance')
-		exit = openmc.ZPlane(surface_id=9, z0=100, name='exit')
+		# Geometry file: add z-plane mesh
+		fuel_or = openmc.ZCylinder(x0=0, y0=0, R=FuelOR)
+		clad_ir = openmc.ZCylinder(x0=0, y0=0, R=CladIR)
+		clad_or = openmc.ZCylinder(x0=0, y0=0, R=CladOR)
+		left = openmc.XPlane(x0=-Pitch/2)
+		right = openmc.XPlane(x0=Pitch/2)
+		back = openmc.YPlane(y0=-Pitch/2)
+		front = openmc.YPlane(y0=Pitch/2)
+		z_list = []
+		for i in range(0,len(Mesh)):
+			z_list.append(openmc.ZPlane(z0=Mesh[i]))
+
 
 		left.boundary_type = 'reflective'
 		right.boundary_type = 'reflective'
-		top.boundary_type = 'reflective'
-		bottom.boundary_type = 'reflective'
-		entrance.boundary_type = 'vacuum'
-		exit.boundary_type = 'vacuum'
+		front.boundary_type = 'reflective'
+		back.boundary_type = 'reflective'
+		z_list[0].boundary_type = 'vacuum'
+		z_list[-1].boundary_type = 'vacuum'
 
-		fuel = openmc.Cell(cell_id=1, name='cell 1')
-		gap = openmc.Cell(cell_id=2, name='cell 2')
-		clad = openmc.Cell(cell_id=3, name='cell 3')
-		water = openmc.Cell(cell_id=4, name='cell 4')
+		fuel = openmc.Cell()
+		gap = openmc.Cell()
+		clad = openmc.Cell()
+		water = openmc.Cell()
 
-		fuel.region = -fuel_or & +entrance & -exit
-		gap.region = +fuel_or & -clad_ir & +entrance & -exit
-		clad.region = +clad_ir & -clad_or & +entrance & -exit
-		water.region = +clad_or & +left & -right & +bottom & -top & +entrance & -exit
+		fuel_list = []
+		gap_list = []
+		clad_list = []
+		water_list = []
+		for i in range(0,len(Mesh)-1):
+			fuel_list.append(openmc.Cell())
+			gap_list.append(openmc.Cell())
+			clad_list.append(openmc.Cell())
+			water_list.append(openmc.Cell())
+
+		# print z_list
+
+		j = 0
+		for fuels in fuel_list:
+			fuels.temperature = self.Tf[j]
+			fuels.region = -fuel_or & +z_list[j] & -z_list[j+1]
+			fuels.fill = uo2
+			j = j+1
+		j = 0
+		for gaps in gap_list:
+			gaps.temperature = self.Tf[j]
+			gaps.region = +fuel_or & -clad_ir & +z_list[j] & -z_list[j+1]
+			gaps.fill = helium
+			j = j+1
+		j = 0
+		for clads in clad_list:
+			clads.temperature = self.Tf[j]
+			clads.region = +clad_ir & -clad_or & +z_list[j] & -z_list[j+1]
+			clads.fill = zircaloy
+			j = j+1
+		j = 0
+		for waters in water_list:
+			waters.temperature = self.Tf[j]
+			waters.region = +clad_or & +left & -right & +back & -front & +z_list[j] & -z_list[j+1]
+			waters.fill = borated_water
+			j = j+1
+
+
+		fuel.region = -fuel_or & +z_list[0] & -z_list[-1]
+		gap.region = +fuel_or & -clad_ir & +z_list[0] & -z_list[-1]
+		clad.region = +clad_ir & -clad_or & +z_list[0] & -z_list[-1]
+		water.region = +clad_or & +left & -right & +back & -front & +z_list[0] & -z_list[-1]
 
 		fuel.fill = uo2
 		gap.fill = helium
 		clad.fill = zircaloy
 		water.fill = borated_water
 
+		# print fuel_list
+
+		# keff is different with and without the random ZPlane
 		root = openmc.Universe(universe_id=0, name='root universe')
-		root.add_cells([fuel, gap, clad, water])
+		root.add_cells(fuel_list)
+		root.add_cells(gap_list)
+		root.add_cells(clad_list)
+		root.add_cells(water_list)
+		# root.add_cells([fuel, gap, clad, water])
 		geometry_file = openmc.Geometry(root)
 		geometry_file.export_to_xml()
 
+
+		# Tallies
+
+
+		# Plots
 		plot = openmc.Plot()
-		plot.width = [Pitch+150, Pitch+150]
-		plot.origin = [0., 0., 50]
-		plot.color_by = 'material'
+		plot.width = [Pitch+450, Pitch+450] #+450, Pitch+450]
+		plot.origin = [0., 0., 200]
+		plot.color_by = 'cell'
 		plot.filename = 'fuel-pin'
 		plot.pixels = [1000, 1000]
 		plot.basis = 'yz'
-		#openmc.plot_inline(plot)
+		# openmc.plot_inline(plot)
 
 		
 		# Move Files to PinGeo folder
