@@ -1,16 +1,261 @@
 <?xml version='1.0' encoding='utf-8'?>
 <geometry>
-  <cell id="1" material="1" name="cell 1" region="-1 8 -9" universe="0" />
-  <cell id="2" material="2" name="cell 2" region="1 -2 8 -9" universe="0" />
-  <cell id="3" material="3" name="cell 3" region="2 -3 8 -9" universe="0" />
-  <cell id="4" material="4" name="cell 4" region="3 4 -5 6 -7 8 -9" universe="0" />
-  <surface coeffs="0 0 0.39218" id="1" name="Fuel OR" type="z-cylinder" />
-  <surface coeffs="0 0 0.40005" id="2" name="Clad IR" type="z-cylinder" />
-  <surface coeffs="0 0 0.4572" id="3" name="Clad OR" type="z-cylinder" />
-  <surface boundary="reflective" coeffs="-0.62992" id="4" name="left" type="x-plane" />
-  <surface boundary="reflective" coeffs="0.62992" id="5" name="right" type="x-plane" />
-  <surface boundary="reflective" coeffs="-0.62992" id="6" name="bottom" type="y-plane" />
-  <surface boundary="reflective" coeffs="0.62992" id="7" name="top" type="y-plane" />
-  <surface boundary="vacuum" coeffs="0" id="8" name="entrance" type="z-plane" />
-  <surface boundary="vacuum" coeffs="100" id="9" name="exit" type="z-plane" />
+  <cell id="1" material="1" region="-1 8 -9" temperature="566.25" universe="0" />
+  <cell id="2" material="2" region="1 -2 8 -9" temperature="566.25" universe="0" />
+  <cell id="3" material="3" region="2 -3 8 -9" temperature="566.25" universe="0" />
+  <cell id="4" material="4" region="3 4 -5 6 -7 8 -9" temperature="566.25" universe="0" />
+  <cell id="5" material="1" region="-1 9 -10" temperature="566.25" universe="0" />
+  <cell id="6" material="2" region="1 -2 9 -10" temperature="566.25" universe="0" />
+  <cell id="7" material="3" region="2 -3 9 -10" temperature="566.25" universe="0" />
+  <cell id="8" material="4" region="3 4 -5 6 -7 9 -10" temperature="566.25" universe="0" />
+  <cell id="9" material="1" region="-1 10 -11" temperature="566.25" universe="0" />
+  <cell id="10" material="2" region="1 -2 10 -11" temperature="566.25" universe="0" />
+  <cell id="11" material="3" region="2 -3 10 -11" temperature="566.25" universe="0" />
+  <cell id="12" material="4" region="3 4 -5 6 -7 10 -11" temperature="566.25" universe="0" />
+  <cell id="13" material="1" region="-1 11 -12" temperature="566.25" universe="0" />
+  <cell id="14" material="2" region="1 -2 11 -12" temperature="566.25" universe="0" />
+  <cell id="15" material="3" region="2 -3 11 -12" temperature="566.25" universe="0" />
+  <cell id="16" material="4" region="3 4 -5 6 -7 11 -12" temperature="566.25" universe="0" />
+  <cell id="17" material="1" region="-1 12 -13" temperature="566.25" universe="0" />
+  <cell id="18" material="2" region="1 -2 12 -13" temperature="566.25" universe="0" />
+  <cell id="19" material="3" region="2 -3 12 -13" temperature="566.25" universe="0" />
+  <cell id="20" material="4" region="3 4 -5 6 -7 12 -13" temperature="566.25" universe="0" />
+  <cell id="21" material="1" region="-1 13 -14" temperature="566.25" universe="0" />
+  <cell id="22" material="2" region="1 -2 13 -14" temperature="566.25" universe="0" />
+  <cell id="23" material="3" region="2 -3 13 -14" temperature="566.25" universe="0" />
+  <cell id="24" material="4" region="3 4 -5 6 -7 13 -14" temperature="566.25" universe="0" />
+  <cell id="25" material="1" region="-1 14 -15" temperature="566.25" universe="0" />
+  <cell id="26" material="2" region="1 -2 14 -15" temperature="566.25" universe="0" />
+  <cell id="27" material="3" region="2 -3 14 -15" temperature="566.25" universe="0" />
+  <cell id="28" material="4" region="3 4 -5 6 -7 14 -15" temperature="566.25" universe="0" />
+  <cell id="29" material="1" region="-1 15 -16" temperature="566.25" universe="0" />
+  <cell id="30" material="2" region="1 -2 15 -16" temperature="566.25" universe="0" />
+  <cell id="31" material="3" region="2 -3 15 -16" temperature="566.25" universe="0" />
+  <cell id="32" material="4" region="3 4 -5 6 -7 15 -16" temperature="566.25" universe="0" />
+  <cell id="33" material="1" region="-1 16 -17" temperature="566.25" universe="0" />
+  <cell id="34" material="2" region="1 -2 16 -17" temperature="566.25" universe="0" />
+  <cell id="35" material="3" region="2 -3 16 -17" temperature="566.25" universe="0" />
+  <cell id="36" material="4" region="3 4 -5 6 -7 16 -17" temperature="566.25" universe="0" />
+  <cell id="37" material="1" region="-1 17 -18" temperature="566.25" universe="0" />
+  <cell id="38" material="2" region="1 -2 17 -18" temperature="566.25" universe="0" />
+  <cell id="39" material="3" region="2 -3 17 -18" temperature="566.25" universe="0" />
+  <cell id="40" material="4" region="3 4 -5 6 -7 17 -18" temperature="566.25" universe="0" />
+  <cell id="41" material="1" region="-1 18 -19" temperature="566.25" universe="0" />
+  <cell id="42" material="2" region="1 -2 18 -19" temperature="566.25" universe="0" />
+  <cell id="43" material="3" region="2 -3 18 -19" temperature="566.25" universe="0" />
+  <cell id="44" material="4" region="3 4 -5 6 -7 18 -19" temperature="566.25" universe="0" />
+  <cell id="45" material="1" region="-1 19 -20" temperature="566.25" universe="0" />
+  <cell id="46" material="2" region="1 -2 19 -20" temperature="566.25" universe="0" />
+  <cell id="47" material="3" region="2 -3 19 -20" temperature="566.25" universe="0" />
+  <cell id="48" material="4" region="3 4 -5 6 -7 19 -20" temperature="566.25" universe="0" />
+  <cell id="49" material="1" region="-1 20 -21" temperature="566.25" universe="0" />
+  <cell id="50" material="2" region="1 -2 20 -21" temperature="566.25" universe="0" />
+  <cell id="51" material="3" region="2 -3 20 -21" temperature="566.25" universe="0" />
+  <cell id="52" material="4" region="3 4 -5 6 -7 20 -21" temperature="566.25" universe="0" />
+  <cell id="53" material="1" region="-1 21 -22" temperature="566.25" universe="0" />
+  <cell id="54" material="2" region="1 -2 21 -22" temperature="566.25" universe="0" />
+  <cell id="55" material="3" region="2 -3 21 -22" temperature="566.25" universe="0" />
+  <cell id="56" material="4" region="3 4 -5 6 -7 21 -22" temperature="566.25" universe="0" />
+  <cell id="57" material="1" region="-1 22 -23" temperature="566.25" universe="0" />
+  <cell id="58" material="2" region="1 -2 22 -23" temperature="566.25" universe="0" />
+  <cell id="59" material="3" region="2 -3 22 -23" temperature="566.25" universe="0" />
+  <cell id="60" material="4" region="3 4 -5 6 -7 22 -23" temperature="566.25" universe="0" />
+  <cell id="61" material="1" region="-1 23 -24" temperature="566.25" universe="0" />
+  <cell id="62" material="2" region="1 -2 23 -24" temperature="566.25" universe="0" />
+  <cell id="63" material="3" region="2 -3 23 -24" temperature="566.25" universe="0" />
+  <cell id="64" material="4" region="3 4 -5 6 -7 23 -24" temperature="566.25" universe="0" />
+  <cell id="65" material="1" region="-1 24 -25" temperature="566.25" universe="0" />
+  <cell id="66" material="2" region="1 -2 24 -25" temperature="566.25" universe="0" />
+  <cell id="67" material="3" region="2 -3 24 -25" temperature="566.25" universe="0" />
+  <cell id="68" material="4" region="3 4 -5 6 -7 24 -25" temperature="566.25" universe="0" />
+  <cell id="69" material="1" region="-1 25 -26" temperature="566.25" universe="0" />
+  <cell id="70" material="2" region="1 -2 25 -26" temperature="566.25" universe="0" />
+  <cell id="71" material="3" region="2 -3 25 -26" temperature="566.25" universe="0" />
+  <cell id="72" material="4" region="3 4 -5 6 -7 25 -26" temperature="566.25" universe="0" />
+  <cell id="73" material="1" region="-1 26 -27" temperature="566.25" universe="0" />
+  <cell id="74" material="2" region="1 -2 26 -27" temperature="566.25" universe="0" />
+  <cell id="75" material="3" region="2 -3 26 -27" temperature="566.25" universe="0" />
+  <cell id="76" material="4" region="3 4 -5 6 -7 26 -27" temperature="566.25" universe="0" />
+  <cell id="77" material="1" region="-1 27 -28" temperature="566.25" universe="0" />
+  <cell id="78" material="2" region="1 -2 27 -28" temperature="566.25" universe="0" />
+  <cell id="79" material="3" region="2 -3 27 -28" temperature="566.25" universe="0" />
+  <cell id="80" material="4" region="3 4 -5 6 -7 27 -28" temperature="566.25" universe="0" />
+  <cell id="81" material="1" region="-1 28 -29" temperature="566.25" universe="0" />
+  <cell id="82" material="2" region="1 -2 28 -29" temperature="566.25" universe="0" />
+  <cell id="83" material="3" region="2 -3 28 -29" temperature="566.25" universe="0" />
+  <cell id="84" material="4" region="3 4 -5 6 -7 28 -29" temperature="566.25" universe="0" />
+  <cell id="85" material="1" region="-1 29 -30" temperature="566.25" universe="0" />
+  <cell id="86" material="2" region="1 -2 29 -30" temperature="566.25" universe="0" />
+  <cell id="87" material="3" region="2 -3 29 -30" temperature="566.25" universe="0" />
+  <cell id="88" material="4" region="3 4 -5 6 -7 29 -30" temperature="566.25" universe="0" />
+  <cell id="89" material="1" region="-1 30 -31" temperature="566.25" universe="0" />
+  <cell id="90" material="2" region="1 -2 30 -31" temperature="566.25" universe="0" />
+  <cell id="91" material="3" region="2 -3 30 -31" temperature="566.25" universe="0" />
+  <cell id="92" material="4" region="3 4 -5 6 -7 30 -31" temperature="566.25" universe="0" />
+  <cell id="93" material="1" region="-1 31 -32" temperature="566.25" universe="0" />
+  <cell id="94" material="2" region="1 -2 31 -32" temperature="566.25" universe="0" />
+  <cell id="95" material="3" region="2 -3 31 -32" temperature="566.25" universe="0" />
+  <cell id="96" material="4" region="3 4 -5 6 -7 31 -32" temperature="566.25" universe="0" />
+  <cell id="97" material="1" region="-1 32 -33" temperature="566.25" universe="0" />
+  <cell id="98" material="2" region="1 -2 32 -33" temperature="566.25" universe="0" />
+  <cell id="99" material="3" region="2 -3 32 -33" temperature="566.25" universe="0" />
+  <cell id="100" material="4" region="3 4 -5 6 -7 32 -33" temperature="566.25" universe="0" />
+  <cell id="101" material="1" region="-1 33 -34" temperature="566.25" universe="0" />
+  <cell id="102" material="2" region="1 -2 33 -34" temperature="566.25" universe="0" />
+  <cell id="103" material="3" region="2 -3 33 -34" temperature="566.25" universe="0" />
+  <cell id="104" material="4" region="3 4 -5 6 -7 33 -34" temperature="566.25" universe="0" />
+  <cell id="105" material="1" region="-1 34 -35" temperature="566.25" universe="0" />
+  <cell id="106" material="2" region="1 -2 34 -35" temperature="566.25" universe="0" />
+  <cell id="107" material="3" region="2 -3 34 -35" temperature="566.25" universe="0" />
+  <cell id="108" material="4" region="3 4 -5 6 -7 34 -35" temperature="566.25" universe="0" />
+  <cell id="109" material="1" region="-1 35 -36" temperature="566.25" universe="0" />
+  <cell id="110" material="2" region="1 -2 35 -36" temperature="566.25" universe="0" />
+  <cell id="111" material="3" region="2 -3 35 -36" temperature="566.25" universe="0" />
+  <cell id="112" material="4" region="3 4 -5 6 -7 35 -36" temperature="566.25" universe="0" />
+  <cell id="113" material="1" region="-1 36 -37" temperature="566.25" universe="0" />
+  <cell id="114" material="2" region="1 -2 36 -37" temperature="566.25" universe="0" />
+  <cell id="115" material="3" region="2 -3 36 -37" temperature="566.25" universe="0" />
+  <cell id="116" material="4" region="3 4 -5 6 -7 36 -37" temperature="566.25" universe="0" />
+  <cell id="117" material="1" region="-1 37 -38" temperature="566.25" universe="0" />
+  <cell id="118" material="2" region="1 -2 37 -38" temperature="566.25" universe="0" />
+  <cell id="119" material="3" region="2 -3 37 -38" temperature="566.25" universe="0" />
+  <cell id="120" material="4" region="3 4 -5 6 -7 37 -38" temperature="566.25" universe="0" />
+  <cell id="121" material="1" region="-1 38 -39" temperature="566.25" universe="0" />
+  <cell id="122" material="2" region="1 -2 38 -39" temperature="566.25" universe="0" />
+  <cell id="123" material="3" region="2 -3 38 -39" temperature="566.25" universe="0" />
+  <cell id="124" material="4" region="3 4 -5 6 -7 38 -39" temperature="566.25" universe="0" />
+  <cell id="125" material="1" region="-1 39 -40" temperature="566.25" universe="0" />
+  <cell id="126" material="2" region="1 -2 39 -40" temperature="566.25" universe="0" />
+  <cell id="127" material="3" region="2 -3 39 -40" temperature="566.25" universe="0" />
+  <cell id="128" material="4" region="3 4 -5 6 -7 39 -40" temperature="566.25" universe="0" />
+  <cell id="129" material="1" region="-1 40 -41" temperature="566.25" universe="0" />
+  <cell id="130" material="2" region="1 -2 40 -41" temperature="566.25" universe="0" />
+  <cell id="131" material="3" region="2 -3 40 -41" temperature="566.25" universe="0" />
+  <cell id="132" material="4" region="3 4 -5 6 -7 40 -41" temperature="566.25" universe="0" />
+  <cell id="133" material="1" region="-1 41 -42" temperature="566.25" universe="0" />
+  <cell id="134" material="2" region="1 -2 41 -42" temperature="566.25" universe="0" />
+  <cell id="135" material="3" region="2 -3 41 -42" temperature="566.25" universe="0" />
+  <cell id="136" material="4" region="3 4 -5 6 -7 41 -42" temperature="566.25" universe="0" />
+  <cell id="137" material="1" region="-1 42 -43" temperature="566.25" universe="0" />
+  <cell id="138" material="2" region="1 -2 42 -43" temperature="566.25" universe="0" />
+  <cell id="139" material="3" region="2 -3 42 -43" temperature="566.25" universe="0" />
+  <cell id="140" material="4" region="3 4 -5 6 -7 42 -43" temperature="566.25" universe="0" />
+  <cell id="141" material="1" region="-1 43 -44" temperature="566.25" universe="0" />
+  <cell id="142" material="2" region="1 -2 43 -44" temperature="566.25" universe="0" />
+  <cell id="143" material="3" region="2 -3 43 -44" temperature="566.25" universe="0" />
+  <cell id="144" material="4" region="3 4 -5 6 -7 43 -44" temperature="566.25" universe="0" />
+  <cell id="145" material="1" region="-1 44 -45" temperature="566.25" universe="0" />
+  <cell id="146" material="2" region="1 -2 44 -45" temperature="566.25" universe="0" />
+  <cell id="147" material="3" region="2 -3 44 -45" temperature="566.25" universe="0" />
+  <cell id="148" material="4" region="3 4 -5 6 -7 44 -45" temperature="566.25" universe="0" />
+  <cell id="149" material="1" region="-1 45 -46" temperature="566.25" universe="0" />
+  <cell id="150" material="2" region="1 -2 45 -46" temperature="566.25" universe="0" />
+  <cell id="151" material="3" region="2 -3 45 -46" temperature="566.25" universe="0" />
+  <cell id="152" material="4" region="3 4 -5 6 -7 45 -46" temperature="566.25" universe="0" />
+  <cell id="153" material="1" region="-1 46 -47" temperature="566.25" universe="0" />
+  <cell id="154" material="2" region="1 -2 46 -47" temperature="566.25" universe="0" />
+  <cell id="155" material="3" region="2 -3 46 -47" temperature="566.25" universe="0" />
+  <cell id="156" material="4" region="3 4 -5 6 -7 46 -47" temperature="566.25" universe="0" />
+  <cell id="157" material="1" region="-1 47 -48" temperature="566.25" universe="0" />
+  <cell id="158" material="2" region="1 -2 47 -48" temperature="566.25" universe="0" />
+  <cell id="159" material="3" region="2 -3 47 -48" temperature="566.25" universe="0" />
+  <cell id="160" material="4" region="3 4 -5 6 -7 47 -48" temperature="566.25" universe="0" />
+  <cell id="161" material="1" region="-1 48 -49" temperature="566.25" universe="0" />
+  <cell id="162" material="2" region="1 -2 48 -49" temperature="566.25" universe="0" />
+  <cell id="163" material="3" region="2 -3 48 -49" temperature="566.25" universe="0" />
+  <cell id="164" material="4" region="3 4 -5 6 -7 48 -49" temperature="566.25" universe="0" />
+  <cell id="165" material="1" region="-1 49 -50" temperature="566.25" universe="0" />
+  <cell id="166" material="2" region="1 -2 49 -50" temperature="566.25" universe="0" />
+  <cell id="167" material="3" region="2 -3 49 -50" temperature="566.25" universe="0" />
+  <cell id="168" material="4" region="3 4 -5 6 -7 49 -50" temperature="566.25" universe="0" />
+  <cell id="169" material="1" region="-1 50 -51" temperature="566.25" universe="0" />
+  <cell id="170" material="2" region="1 -2 50 -51" temperature="566.25" universe="0" />
+  <cell id="171" material="3" region="2 -3 50 -51" temperature="566.25" universe="0" />
+  <cell id="172" material="4" region="3 4 -5 6 -7 50 -51" temperature="566.25" universe="0" />
+  <cell id="173" material="1" region="-1 51 -52" temperature="566.25" universe="0" />
+  <cell id="174" material="2" region="1 -2 51 -52" temperature="566.25" universe="0" />
+  <cell id="175" material="3" region="2 -3 51 -52" temperature="566.25" universe="0" />
+  <cell id="176" material="4" region="3 4 -5 6 -7 51 -52" temperature="566.25" universe="0" />
+  <cell id="177" material="1" region="-1 52 -53" temperature="566.25" universe="0" />
+  <cell id="178" material="2" region="1 -2 52 -53" temperature="566.25" universe="0" />
+  <cell id="179" material="3" region="2 -3 52 -53" temperature="566.25" universe="0" />
+  <cell id="180" material="4" region="3 4 -5 6 -7 52 -53" temperature="566.25" universe="0" />
+  <cell id="181" material="1" region="-1 53 -54" temperature="566.25" universe="0" />
+  <cell id="182" material="2" region="1 -2 53 -54" temperature="566.25" universe="0" />
+  <cell id="183" material="3" region="2 -3 53 -54" temperature="566.25" universe="0" />
+  <cell id="184" material="4" region="3 4 -5 6 -7 53 -54" temperature="566.25" universe="0" />
+  <cell id="185" material="1" region="-1 54 -55" temperature="566.25" universe="0" />
+  <cell id="186" material="2" region="1 -2 54 -55" temperature="566.25" universe="0" />
+  <cell id="187" material="3" region="2 -3 54 -55" temperature="566.25" universe="0" />
+  <cell id="188" material="4" region="3 4 -5 6 -7 54 -55" temperature="566.25" universe="0" />
+  <cell id="189" material="1" region="-1 55 -56" temperature="566.25" universe="0" />
+  <cell id="190" material="2" region="1 -2 55 -56" temperature="566.25" universe="0" />
+  <cell id="191" material="3" region="2 -3 55 -56" temperature="566.25" universe="0" />
+  <cell id="192" material="4" region="3 4 -5 6 -7 55 -56" temperature="566.25" universe="0" />
+  <cell id="193" material="1" region="-1 56 -57" temperature="566.25" universe="0" />
+  <cell id="194" material="2" region="1 -2 56 -57" temperature="566.25" universe="0" />
+  <cell id="195" material="3" region="2 -3 56 -57" temperature="566.25" universe="0" />
+  <cell id="196" material="4" region="3 4 -5 6 -7 56 -57" temperature="566.25" universe="0" />
+  <cell id="197" material="1" region="-1 57 -58" temperature="566.25" universe="0" />
+  <cell id="198" material="2" region="1 -2 57 -58" temperature="566.25" universe="0" />
+  <cell id="199" material="3" region="2 -3 57 -58" temperature="566.25" universe="0" />
+  <cell id="200" material="4" region="3 4 -5 6 -7 57 -58" temperature="566.25" universe="0" />
+  <surface coeffs="0 0 0.39218" id="1" type="z-cylinder" />
+  <surface coeffs="0 0 0.40005" id="2" type="z-cylinder" />
+  <surface coeffs="0 0 0.4572" id="3" type="z-cylinder" />
+  <surface boundary="reflective" coeffs="-0.62992" id="4" type="x-plane" />
+  <surface boundary="reflective" coeffs="0.62992" id="5" type="x-plane" />
+  <surface boundary="reflective" coeffs="-0.62992" id="6" type="y-plane" />
+  <surface boundary="reflective" coeffs="0.62992" id="7" type="y-plane" />
+  <surface boundary="vacuum" coeffs="0.0" id="8" type="z-plane" />
+  <surface coeffs="0.4141" id="9" type="z-plane" />
+  <surface coeffs="3.772" id="10" type="z-plane" />
+  <surface coeffs="11.987" id="11" type="z-plane" />
+  <surface coeffs="20.202" id="12" type="z-plane" />
+  <surface coeffs="28.417" id="13" type="z-plane" />
+  <surface coeffs="36.632" id="14" type="z-plane" />
+  <surface coeffs="44.847" id="15" type="z-plane" />
+  <surface coeffs="53.062" id="16" type="z-plane" />
+  <surface coeffs="61.277" id="17" type="z-plane" />
+  <surface coeffs="66.992" id="18" type="z-plane" />
+  <surface coeffs="74.739" id="19" type="z-plane" />
+  <surface coeffs="82.486" id="20" type="z-plane" />
+  <surface coeffs="90.233" id="21" type="z-plane" />
+  <surface coeffs="97.98" id="22" type="z-plane" />
+  <surface coeffs="105.727" id="23" type="z-plane" />
+  <surface coeffs="113.474" id="24" type="z-plane" />
+  <surface coeffs="119.189" id="25" type="z-plane" />
+  <surface coeffs="126.936" id="26" type="z-plane" />
+  <surface coeffs="134.683" id="27" type="z-plane" />
+  <surface coeffs="142.43" id="28" type="z-plane" />
+  <surface coeffs="150.177" id="29" type="z-plane" />
+  <surface coeffs="157.924" id="30" type="z-plane" />
+  <surface coeffs="165.671" id="31" type="z-plane" />
+  <surface coeffs="171.386" id="32" type="z-plane" />
+  <surface coeffs="179.133" id="33" type="z-plane" />
+  <surface coeffs="186.88" id="34" type="z-plane" />
+  <surface coeffs="194.627" id="35" type="z-plane" />
+  <surface coeffs="202.374" id="36" type="z-plane" />
+  <surface coeffs="210.121" id="37" type="z-plane" />
+  <surface coeffs="217.868" id="38" type="z-plane" />
+  <surface coeffs="223.583" id="39" type="z-plane" />
+  <surface coeffs="231.33" id="40" type="z-plane" />
+  <surface coeffs="239.077" id="41" type="z-plane" />
+  <surface coeffs="246.824" id="42" type="z-plane" />
+  <surface coeffs="254.571" id="43" type="z-plane" />
+  <surface coeffs="262.318" id="44" type="z-plane" />
+  <surface coeffs="270.065" id="45" type="z-plane" />
+  <surface coeffs="275.78" id="46" type="z-plane" />
+  <surface coeffs="283.527" id="47" type="z-plane" />
+  <surface coeffs="291.274" id="48" type="z-plane" />
+  <surface coeffs="299.021" id="49" type="z-plane" />
+  <surface coeffs="306.768" id="50" type="z-plane" />
+  <surface coeffs="314.515" id="51" type="z-plane" />
+  <surface coeffs="322.262" id="52" type="z-plane" />
+  <surface coeffs="327.977" id="53" type="z-plane" />
+  <surface coeffs="335.5336" id="54" type="z-plane" />
+  <surface coeffs="343.0902" id="55" type="z-plane" />
+  <surface coeffs="350.6468" id="56" type="z-plane" />
+  <surface coeffs="358.2034" id="57" type="z-plane" />
+  <surface boundary="vacuum" coeffs="365.76" id="58" type="z-plane" />
 </geometry>

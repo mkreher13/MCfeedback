@@ -6,12 +6,13 @@
   <inactive>5</inactive>
   <source strength="1.0">
     <space type="fission">
-      <parameters>-0.62992 -0.62992 -10.0 0.62992 0.62992 10.0</parameters>
+      <parameters>-0.62992 -0.62992 0 0.62992 0.62992 365.76</parameters>
     </space>
   </source>
   <output>
     <tallies>false</tallies>
   </output>
+  <seed>1</seed>
   <temperature_multipole>true</temperature_multipole>
   <temperature_tolerance>1000</temperature_tolerance>
 </settings>
