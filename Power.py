@@ -1,5 +1,5 @@
 # Class to provide initial linear power
-# Last modified by Miriam Rathbun on 02/14/2018
+# Last modified by Miriam Rathbun on 02/16/2018
 
 import numpy as np
 import shutil
@@ -39,18 +39,17 @@ class Power():
 		Pitch = opt.PinPitch*100 #[cm]
 
 		# Construct uniform initial source distribution over fissionable zones
-		# Something may be wrong here
-		lower_left = [-0.62992, -0.62992, 0]
-		upper_right = [+0.62992, +0.62992, +365.76]
+		lower_left = [-0.62992, -Pitch/2, 0]
+		upper_right = [+0.62992, +Pitch/2, +365.76]
 		uniform_dist = openmc.stats.Box(lower_left, upper_right, only_fissionable=True)
 
 		# Settings file
 		settings_file = openmc.Settings()
-		settings_file.batches = 100
-		settings_file.inactive = 50
+		settings_file.batches = 10
+		settings_file.inactive = 5
 		settings_file.particles = 10000
 		settings_file.output = {'tallies': False}
-		settings_file.temperature = {'multipole': True, 'tolerance': 1000} #need a multipole library
+		settings_file.temperature = {'multipole': True, 'tolerance': 1000}
 		settings_file.source = openmc.source.Source(space=uniform_dist)
 		settings_file.seed = 1
 
@@ -96,7 +95,6 @@ class Power():
 		for i in range(0,len(Mesh)):
 			z_list.append(openmc.ZPlane(z0=Mesh[i]))
 
-
 		left.boundary_type = 'reflective'
 		right.boundary_type = 'reflective'
 		front.boundary_type = 'reflective'
@@ -104,70 +102,53 @@ class Power():
 		z_list[0].boundary_type = 'vacuum'
 		z_list[-1].boundary_type = 'vacuum'
 
-		fuel = openmc.Cell()
-		gap = openmc.Cell()
-		clad = openmc.Cell()
-		water = openmc.Cell()
-
-		fuel_list = []
-		gap_list = []
-		clad_list = []
-		water_list = []
+		self.fuel_list = []
+		self.gap_list = []
+		self.clad_list = []
+		self.water_list = []
 		for i in range(0,len(Mesh)-1):
-			fuel_list.append(openmc.Cell())
-			gap_list.append(openmc.Cell())
-			clad_list.append(openmc.Cell())
-			water_list.append(openmc.Cell())
+			self.fuel_list.append(openmc.Cell())
+			self.gap_list.append(openmc.Cell())
+			self.clad_list.append(openmc.Cell())
+			self.water_list.append(openmc.Cell())
 
 		# print z_list
 
 		j = 0
-		for fuels in fuel_list:
+		for fuels in self.fuel_list:
 			fuels.temperature = self.Tf[j]
 			fuels.region = -fuel_or & +z_list[j] & -z_list[j+1]
 			fuels.fill = uo2
 			j = j+1
 		j = 0
-		for gaps in gap_list:
-			gaps.temperature = self.Tf[j]
+		for gaps in self.gap_list:
+			# gaps.temperature = self.Tf[j]
 			gaps.region = +fuel_or & -clad_ir & +z_list[j] & -z_list[j+1]
 			gaps.fill = helium
 			j = j+1
 		j = 0
-		for clads in clad_list:
-			clads.temperature = self.Tf[j]
+		for clads in self.clad_list:
+			# clads.temperature = self.Tf[j]
 			clads.region = +clad_ir & -clad_or & +z_list[j] & -z_list[j+1]
 			clads.fill = zircaloy
 			j = j+1
 		j = 0
-		for waters in water_list:
-			waters.temperature = self.Tf[j]
+		for waters in self.water_list:
+			# waters.temperature = self.Tf[j]
 			waters.region = +clad_or & +left & -right & +back & -front & +z_list[j] & -z_list[j+1]
 			waters.fill = borated_water
 			j = j+1
 
-
-		fuel.region = -fuel_or & +z_list[0] & -z_list[-1]
-		gap.region = +fuel_or & -clad_ir & +z_list[0] & -z_list[-1]
-		clad.region = +clad_ir & -clad_or & +z_list[0] & -z_list[-1]
-		water.region = +clad_or & +left & -right & +back & -front & +z_list[0] & -z_list[-1]
-
-		fuel.fill = uo2
-		gap.fill = helium
-		clad.fill = zircaloy
-		water.fill = borated_water
-
 		# print fuel_list
 
 		# keff is different with and without the random ZPlane
-		root = openmc.Universe(universe_id=0, name='root universe')
-		root.add_cells(fuel_list)
-		root.add_cells(gap_list)
-		root.add_cells(clad_list)
-		root.add_cells(water_list)
-		# root.add_cells([fuel, gap, clad, water])
-		geometry_file = openmc.Geometry(root)
-		geometry_file.export_to_xml()
+		self.root = openmc.Universe(universe_id=0, name='root universe')
+		self.root.add_cells(self.fuel_list)
+		self.root.add_cells(self.gap_list)
+		self.root.add_cells(self.clad_list)
+		self.root.add_cells(self.water_list)
+		self.geometry_file = openmc.Geometry(self.root)
+		self.geometry_file.export_to_xml()
 
 
 		# Tallies
@@ -175,7 +156,7 @@ class Power():
 
 		# Plots
 		plot = openmc.Plot()
-		plot.width = [Pitch+450, Pitch+450] #+450, Pitch+450]
+		plot.width = [Pitch+450, Pitch+450]
 		plot.origin = [0., 0., 200]
 		plot.color_by = 'cell'
 		plot.filename = 'fuel-pin'
@@ -196,9 +177,34 @@ class Power():
 
 	def Fuel(self, Tf):
 
-		# Update fuel temperatures in OpenMC
+		# Update temperatures in OpenMC
 		print("Fuel temperature:")
 		print(Tf)
+
+		j = 0
+		for fuels in self.fuel_list:
+			fuels.temperature = Tf[j]
+			j = j+1
+		j = 0
+		# for gaps in self.gap_list:
+		# 	gaps.temperature = Tf[j]
+		# 	j = j+1
+		# j = 0
+		# for clads in self.clad_list:
+		# 	clads.temperature = Tf[j]
+		# 	j = j+1
+		# j = 0
+		# for waters in self.water_list:
+		# 	waters.temperature = Tf[j]
+		# 	j = j+1
+
+		self.root.add_cells(self.fuel_list)
+		# self.root.add_cells(self.gap_list)
+		# self.root.add_cells(self.clad_list)
+		# self.root.add_cells(self.water_list)
+		self.geometry_file = openmc.Geometry(self.root)
+		self.geometry_file.export_to_xml()
+		shutil.move('geometry.xml', 'PinGeo/geometry.xml')
 
 
 		openmc.run(cwd='PinGeo')

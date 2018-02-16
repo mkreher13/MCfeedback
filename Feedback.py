@@ -1,4 +1,4 @@
-# Last edited by Miriam Rathbun on 02/09/2018
+# Last edited by Miriam Rathbun on 02/16/2018
 # OpenMC model of fuel pin & water cell
 
 # Before running for the first time: export PYTHONPATH=~/Desktop/MCFeedback/iapws:$PYTHONPATH

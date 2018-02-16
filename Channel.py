@@ -1,5 +1,5 @@
 # Class to perform thermal analysis and compute heat transfer coeficient
-# Last modified by Miriam Rathbun on 02/09/2018
+# Last modified by Miriam Rathbun on 02/16/2018
 
 # Assumptions:
 # subcooled boiling at wall
