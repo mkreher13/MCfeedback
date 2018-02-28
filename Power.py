@@ -1,5 +1,5 @@
 # Class to provide initial linear power
-# Last modified by Miriam Rathbun on 02/16/2018
+# Last modified by Miriam Rathbun on 02/27/2018
 
 import numpy as np
 import shutil
@@ -7,27 +7,22 @@ import openmc
 
 class Power():
 
-###############################################################
+########################################################################
 
 	def __init__(self):
 		self
 
-###############################################################
+########################################################################
 
-	def Initial(self, opt, Mesh):
+	def initial(self, opt, Mesh):
 
 		#####################################
 		# Initial power distribution
 		#####################################
 
 		q_prime = 17860
-		self.Tf = np.zeros(len(Mesh))
-		self.Tf[:] = opt.Tin
 		self.LinPower = np.zeros(len(Mesh))
 		self.LinPower[:] = q_prime
-
-		# print self.Tf
-
 
 		#####################################
 		# Create OpenMC geometry
@@ -116,25 +111,21 @@ class Power():
 
 		j = 0
 		for fuels in self.fuel_list:
-			fuels.temperature = self.Tf[j]
 			fuels.region = -fuel_or & +z_list[j] & -z_list[j+1]
 			fuels.fill = uo2
 			j = j+1
 		j = 0
 		for gaps in self.gap_list:
-			# gaps.temperature = self.Tf[j]
 			gaps.region = +fuel_or & -clad_ir & +z_list[j] & -z_list[j+1]
 			gaps.fill = helium
 			j = j+1
 		j = 0
 		for clads in self.clad_list:
-			# clads.temperature = self.Tf[j]
 			clads.region = +clad_ir & -clad_or & +z_list[j] & -z_list[j+1]
 			clads.fill = zircaloy
 			j = j+1
 		j = 0
 		for waters in self.water_list:
-			# waters.temperature = self.Tf[j]
 			waters.region = +clad_or & +left & -right & +back & -front & +z_list[j] & -z_list[j+1]
 			waters.fill = borated_water
 			j = j+1
@@ -152,6 +143,8 @@ class Power():
 
 
 		# Tallies
+		# power distribution: fission q recoverable (starts 0, might be data pb)
+		# openmc accounts for incoming neutron energy and isotope
 
 
 		# Plots
@@ -173,9 +166,9 @@ class Power():
 
 
 
-###############################################################
+########################################################################
 
-	def Fuel(self, Tf):
+	def fuel(self, Tf, Tgap, Tclad):
 
 		# Update temperatures in OpenMC
 		print("Fuel temperature:")
@@ -186,21 +179,21 @@ class Power():
 			fuels.temperature = Tf[j]
 			j = j+1
 		j = 0
-		# for gaps in self.gap_list:
-		# 	gaps.temperature = Tf[j]
-		# 	j = j+1
-		# j = 0
-		# for clads in self.clad_list:
-		# 	clads.temperature = Tf[j]
-		# 	j = j+1
-		# j = 0
+		for gaps in self.gap_list:
+			gaps.temperature = Tgap[j]
+			j = j+1
+		j = 0
+		for clads in self.clad_list:
+			clads.temperature = Tclad[j]
+			j = j+1
+		j = 0
 		# for waters in self.water_list:
 		# 	waters.temperature = Tf[j]
 		# 	j = j+1
 
 		self.root.add_cells(self.fuel_list)
-		# self.root.add_cells(self.gap_list)
-		# self.root.add_cells(self.clad_list)
+		self.root.add_cells(self.gap_list)
+		self.root.add_cells(self.clad_list)
 		# self.root.add_cells(self.water_list)
 		self.geometry_file = openmc.Geometry(self.root)
 		self.geometry_file.export_to_xml()

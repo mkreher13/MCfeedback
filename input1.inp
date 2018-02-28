@@ -16,6 +16,7 @@ CladOR 0.004572      #[m]
 CladIR 0.0040005     #[m]
 FuelOR 0.0039218     #[m]
 PinPitch 0.0125984   #[m]
+GridPitch 0.01221    #[m]
 
 
 # Axial specifications (beavrs_2.0.1_specs.pdf)

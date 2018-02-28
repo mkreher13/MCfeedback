@@ -1,5 +1,5 @@
 # Parsing input file
-# Last edited by Miriam Rathbun on 02/09/2018
+# Last edited by Miriam Rathbun on 02/27/2018
 
 import numpy as np
 
@@ -14,6 +14,9 @@ class ModelOpts:
 		inpFile = open(filename, 'r')
 
 		SpacingList = []
+		self.GridTop_z = []
+		self.GridBot_z = []
+		Z = 0
 
 
 		for line in inpFile:
@@ -44,6 +47,11 @@ class ModelOpts:
 
 			elif keyword == 'Active' or keyword == 'Grid':
 				SpacingList.append(float(arguments))
+				Z = Z + float(arguments)
+				if keyword == 'Grid':
+					self.GridTop_z.append(Z)
+				else:
+					self.GridBot_z.append(Z)
 
 			elif keyword == 'CladOR':
 				self.CladOR = float(arguments)
@@ -57,9 +65,11 @@ class ModelOpts:
 			elif keyword == 'PinPitch':
 				self.PinPitch = float(arguments)
 
+			elif keyword == 'GridPitch':
+				self.GridPitch = float(arguments)
+
 			else:
 				continue
 
 		self.GapR = (self.CladIR+self.FuelOR)/2
 		self.Spacing = np.array(SpacingList)
-
