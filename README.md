@@ -13,6 +13,7 @@ Power code:
 Initially creates OpenMC geometry for fuel pin and surrounding water with multipole data. Each cell has its own temperature. 
 Updates temperature in each cell and runs the OpenMC. 
 Future work: run only one batch at a time. (insert source that says convergence is achieved this way)
+Future work: add power tally (fission q recoverable). Note that this tally accounts for incoming neutron energy and fissioning isotope. This tally assumes that all energy is deposited in the fuel. 
 
 Project context:
 Exascale, fast running TH surrogate model. This serves as the initial conditions to figure out the best iteration before doing the expensive CFD. 
