@@ -1,5 +1,5 @@
 # Class to perform thermal analysis and compute heat transfer coeficient
-# Last modified by Miriam Rathbun on 02/27/2018
+# Last modified by Miriam Rathbun on 03/05/2018
 
 # Assumptions:
 # subcooled boiling at wall
@@ -47,7 +47,7 @@ class Channel():
 
 ########################################################################
 
-	def htc(self, opt, LinPower):
+	def htc(self, opt, PowerTally):
 
 		L = (self.Mesh[len(self.Mesh)-1]-self.Mesh[0])/100 # Conversion to meters
 		P = opt.Pressure
@@ -64,6 +64,7 @@ class Channel():
 					Area[i] = opt.GridPitch**2-np.pi*opt.CladOR**2
 		# print Area
 		De = 4*Area[:]/(2*np.pi*opt.CladOR+opt.PinPitch**2)
+		LinPower = np.zeros(len(self.Mesh))
 
 
 		subcooled_liq = IAPWS97(T=Tin, x=0)
@@ -74,11 +75,11 @@ class Channel():
 		HeatFlux = np.zeros(len(self.Mesh))
 		self.enthalpy = np.zeros(len(self.Mesh))
 		self.Tbulk = np.zeros(len(self.Mesh))
+		self.RhoBulk = np.zeros(len(self.Mesh))
 		self.Tw = np.zeros(len(self.Mesh))
 		self.Tw_updated = np.zeros(len(self.Mesh))
 		self.velocity = np.zeros(len(self.Mesh))
 		count = np.zeros(len(self.Mesh))
-		HeatFlux[:] = LinPower[:]/(2*np.pi*opt.CladOR)
 
 
 
@@ -96,6 +97,8 @@ class Channel():
 				self.Tw[i] = Tin
 			else:
 				MeshStep = (self.Mesh[i]-self.Mesh[i-1])/100. # Converted to meters
+				LinPower[i] = 17860. # PowerTally[i]/MeshStep/100
+				print PowerTally[i]/MeshStep/100
 				self.Tw[i] = self.Tw[i-1]
 				self.enthalpy[i] = LinPower[i]/1000.*MeshStep/(G*Area[i]) + self.enthalpy[i-1]
 				self.Tbulk[i] = (self.enthalpy[i]-self.enthalpy[i-1])/(liq.cp) + self.Tbulk[i-1]
@@ -107,8 +110,7 @@ class Channel():
 			Nu = 0.023*(Re**0.8)*(Pr**0.4)
 			HTC_c = Nu*liq.k/De[i]
 			S = 1/(1.+2.53E-6*Re**1.17)
-
-
+			HeatFlux[i] = LinPower[i]/(2*np.pi*opt.CladOR)
 
 
 			# Converging to Tw (wall temperature)
@@ -125,6 +127,7 @@ class Channel():
 				# Conservation equations
 				rho_top = IAPWS97(T=self.Tbulk[i], x=0).rho
 				rho_bot = IAPWS97(T=self.Tbulk[i-1], x=0).rho
+				self.RhoBulk[i] = rho_top
 
 				# Mass
 				self.velocity[i] = G/rho_top
@@ -146,12 +149,12 @@ class Channel():
 
 		rho_out = IAPWS97(T=self.Tbulk[len(self.Mesh)-1], x=0).rho
 		rho_in = subcooled_liq.rho
+		self.RhoBulk[0] = rho_in
 		self.velocity[0] = G/rho_in
 		totalP = G**2*(1/rho_out-1/rho_in) + f*G**2/De_avg/2/((rho_out+rho_in)/2)*L + 9.81*(rho_out+rho_in)/2*L 
 		# print("Total pressure change between inlet/outlet: %f [Pa]" % totalP)
 		# print("Total pressure change by sum of increments: %f [Pa]" % P_sum)
 
-			
 		
 		# print("Temperature in the bulk liquid [K]:")
 		# print(self.Tbulk)

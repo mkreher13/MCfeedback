@@ -1,5 +1,5 @@
 # Class to provide initial linear power
-# Last modified by Miriam Rathbun on 02/27/2018
+# Last modified by Miriam Rathbun on 03/05/2018
 
 import numpy as np
 import shutil
@@ -15,14 +15,6 @@ class Power():
 ########################################################################
 
 	def initial(self, opt, Mesh):
-
-		#####################################
-		# Initial power distribution
-		#####################################
-
-		q_prime = 17860
-		self.LinPower = np.zeros(len(Mesh))
-		self.LinPower[:] = q_prime
 
 		#####################################
 		# Create OpenMC geometry
@@ -50,7 +42,8 @@ class Power():
 
 		settings_file.export_to_xml()
 
-		# Materials: to be modified for each mesh, add temperature info
+
+		# Materials file
 		uo2 = openmc.Material(material_id=1, name='UO2 fuel at 2.4% wt enrichment')
 		uo2.set_density('g/cm3', 10.29769)
 		uo2.add_element('U', 1., enrichment=2.4)
@@ -67,18 +60,18 @@ class Power():
 		zircaloy.add_element('Cr', 0.001  , 'wo')
 		zircaloy.add_element('Zr', 0.98335, 'wo')
 
-		borated_water = openmc.Material(material_id=4, name='Borated water')
-		borated_water.set_density('g/cm3', 0.740582)
+		borated_water = openmc.Material()
+		borated_water.set_density('g/cm3', 0.7406)
 		borated_water.add_element('B', 4.0e-5)
 		borated_water.add_element('H', 5.0e-2)
 		borated_water.add_element('O', 2.4e-2)
 		borated_water.add_s_alpha_beta('c_H_in_H2O')
 
-		materials_file = openmc.Materials([uo2, helium, zircaloy, borated_water])
-		materials_file.export_to_xml()
+		self.materials_file = openmc.Materials([uo2, helium, zircaloy, borated_water])
+		self.materials_file.export_to_xml()
 
 
-		# Geometry file: add z-plane mesh
+		# Geometry file
 		fuel_or = openmc.ZCylinder(x0=0, y0=0, R=FuelOR)
 		clad_ir = openmc.ZCylinder(x0=0, y0=0, R=CladIR)
 		clad_or = openmc.ZCylinder(x0=0, y0=0, R=CladOR)
@@ -107,8 +100,6 @@ class Power():
 			self.clad_list.append(openmc.Cell())
 			self.water_list.append(openmc.Cell())
 
-		# print z_list
-
 		j = 0
 		for fuels in self.fuel_list:
 			fuels.region = -fuel_or & +z_list[j] & -z_list[j+1]
@@ -130,9 +121,6 @@ class Power():
 			waters.fill = borated_water
 			j = j+1
 
-		# print fuel_list
-
-		# keff is different with and without the random ZPlane
 		self.root = openmc.Universe(universe_id=0, name='root universe')
 		self.root.add_cells(self.fuel_list)
 		self.root.add_cells(self.gap_list)
@@ -145,6 +133,12 @@ class Power():
 		# Tallies
 		# power distribution: fission q recoverable (starts 0, might be data pb)
 		# openmc accounts for incoming neutron energy and isotope
+		cell_filter = openmc.CellFilter(self.fuel_list)
+		t = openmc.Tally()
+		t.filters.append(cell_filter)
+		t.scores = ['fission-q-recoverable']
+		tallies = openmc.Tallies([t])
+		tallies.export_to_xml()
 
 
 		# Plots
@@ -162,17 +156,39 @@ class Power():
 		shutil.move('settings.xml', 'PinGeo/settings.xml')
 		shutil.move('materials.xml', 'PinGeo/materials.xml')
 		shutil.move('geometry.xml', 'PinGeo/geometry.xml')
+		shutil.move('tallies.xml', 'PinGeo/tallies.xml')
 		# shutil.move('plots.xml', 'PinGeo/plots.xml')
 
+		openmc.run(cwd='PinGeo')
+		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
+		tally = sp.get_tally(scores=['fission-q-recoverable'])
+		self.Tally = np.insert(np.ndarray.flatten(tally.sum),0,0)*settings_file.particles*1.60218e-19
 
 
 ########################################################################
 
-	def fuel(self, Tf, Tgap, Tclad):
+	def fuel(self, Tf, Tgap, Tclad, Tbulk, Mesh, RhoBulk):
 
 		# Update temperatures in OpenMC
 		print("Fuel temperature:")
 		print(Tf)
+
+		NewWaterMat_list = []
+		for i in range(0,len(Mesh)-1):
+			NewWaterMat_list.append(openmc.Material())
+		j = 0
+		for NewWater in NewWaterMat_list:
+			NewWater.set_density('g/cm3', RhoBulk[j]/1000)
+			NewWater.temperature = Tbulk[j]
+			NewWater.add_element('B', 4.0e-5)
+			NewWater.add_element('H', 5.0e-2)
+			NewWater.add_element('O', 2.4e-2)
+			NewWater.add_s_alpha_beta('c_H_in_H2O')
+			self.materials_file.append(NewWater)
+			j = j+1
+
+		self.materials_file.export_to_xml()
+		shutil.move('materials.xml', 'PinGeo/materials.xml')
 
 		j = 0
 		for fuels in self.fuel_list:
@@ -187,20 +203,35 @@ class Power():
 			clads.temperature = Tclad[j]
 			j = j+1
 		j = 0
-		# for waters in self.water_list:
-		# 	waters.temperature = Tf[j]
-		# 	j = j+1
+		for waters in self.water_list:
+			waters.fill = NewWaterMat_list[j]
+			j = j+1
 
 		self.root.add_cells(self.fuel_list)
 		self.root.add_cells(self.gap_list)
 		self.root.add_cells(self.clad_list)
-		# self.root.add_cells(self.water_list)
+		self.root.add_cells(self.water_list)
 		self.geometry_file = openmc.Geometry(self.root)
 		self.geometry_file.export_to_xml()
 		shutil.move('geometry.xml', 'PinGeo/geometry.xml')
 
+		# Tallies
+		# power distribution: fission q recoverable (starts 0, might be data pb)
+		# openmc accounts for incoming neutron energy and isotope
+		cell_filter = openmc.CellFilter(self.fuel_list)
+		t = openmc.Tally()
+		t.filters.append(cell_filter)
+		t.scores = ['fission-q-recoverable']
+		tallies = openmc.Tallies([t])
+		tallies.export_to_xml()
+		shutil.move('tallies.xml', 'PinGeo/tallies.xml')
+
 
 		openmc.run(cwd='PinGeo')
+		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
+		tally = sp.get_tally(scores=['fission-q-recoverable'])
+		self.Tally = np.insert(np.ndarray.flatten(tally.sum),0,0)*10000*1.60218e-19
+
 
 
 
