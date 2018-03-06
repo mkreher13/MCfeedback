@@ -66,7 +66,6 @@ class Channel():
 		De = 4*Area[:]/(2*np.pi*opt.CladOR+opt.PinPitch**2)
 		LinPower = np.zeros(len(self.Mesh))
 
-
 		subcooled_liq = IAPWS97(T=Tin, x=0)
 		sat_liq = IAPWS97(P=P, x=0)
 		sat_steam = IAPWS97(P=P, x=1)
@@ -84,11 +83,8 @@ class Channel():
 
 
 		# Heat transfer coefficients HTC_c (convection) & HTC_nb (nucleate boiling)
-
 		P_sum = 0.
-
 		for i in range(0,len(self.Mesh)):
-
 			E = 1000.
 
 			if i == 0:
@@ -97,8 +93,7 @@ class Channel():
 				self.Tw[i] = Tin
 			else:
 				MeshStep = (self.Mesh[i]-self.Mesh[i-1])/100. # Converted to meters
-				LinPower[i] = 17860. # PowerTally[i]/MeshStep/100
-				print PowerTally[i]/MeshStep/100
+				LinPower[i] = PowerTally[i]/MeshStep
 				self.Tw[i] = self.Tw[i-1]
 				self.enthalpy[i] = LinPower[i]/1000.*MeshStep/(G*Area[i]) + self.enthalpy[i-1]
 				self.Tbulk[i] = (self.enthalpy[i]-self.enthalpy[i-1])/(liq.cp) + self.Tbulk[i-1]
