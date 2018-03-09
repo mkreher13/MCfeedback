@@ -4,6 +4,10 @@ Single-pin coupled Thermal-MC code to study feedback effects in Monte Carlo.
 Variable grid spacing:
 Based on the grid spacer locations, a uniform mesh is inserted between spacings that are further apart than the prescribed maximum spacing value. 
 
+Mesh setup:
+At the edges: T, h, rho
+In the cell: Tally, LinearPower, HeatFlux, average T
+
 Channel code:
 PWR conditions, all subcooled boiling using a modified Chen correlation (Todreas & Kazimi).
 Uses equivalent temperature model BE2 (Grandi, Smith, Xu, Rhodes "EFFECT OF CASMO-5 CROSS-SECTION DATA AND DOPPLER TEMPERATURE DEFINITIONS ON LWR REACTIVITY INITIATED ACCIDENTS").
