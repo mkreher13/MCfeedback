@@ -162,8 +162,7 @@ class Power():
 		# openmc.run(cwd='PinGeo')
 		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
 		tally = sp.get_tally(scores=['fission-q-recoverable'])
-		self.Tally = np.insert(np.ndarray.flatten(tally.sum),0,0)*0.00015
-		print len(self.Tally)
+		self.Tally = np.ndarray.flatten(tally.sum)*0.00015
 
 
 ########################################################################
@@ -180,7 +179,7 @@ class Power():
 		j = 0
 		for NewWater in NewWaterMat_list:
 			NewWater.set_density('g/cm3', RhoBulk[j]/1000)
-			NewWater.temperature = Tbulk[j]
+			NewWater.temperature = (Tbulk[j]+Tbulk[j+1])/2.
 			NewWater.add_element('B', 4.0e-5)
 			NewWater.add_element('H', 5.0e-2)
 			NewWater.add_element('O', 2.4e-2)
@@ -193,15 +192,15 @@ class Power():
 
 		j = 0
 		for fuels in self.fuel_list:
-			fuels.temperature = Tf[j]
+			fuels.temperature = (Tf[j]+Tf[j+1])/2.
 			j = j+1
 		j = 0
 		for gaps in self.gap_list:
-			gaps.temperature = Tgap[j]
+			gaps.temperature = (Tgap[j]+Tgap[j])/2.
 			j = j+1
 		j = 0
 		for clads in self.clad_list:
-			clads.temperature = Tclad[j]
+			clads.temperature = (Tclad[j]+Tclad[j+1])/2.
 			j = j+1
 		j = 0
 		for waters in self.water_list:
@@ -231,7 +230,7 @@ class Power():
 		# openmc.run(cwd='PinGeo')
 		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
 		tally = sp.get_tally(scores=['fission-q-recoverable'])
-		self.Tally = np.insert(np.ndarray.flatten(tally.sum),0,0)*0.00015
+		self.Tally = np.ndarray.flatten(tally.sum)*0.00015
 
 
 
