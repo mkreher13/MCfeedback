@@ -159,7 +159,7 @@ class Power():
 		shutil.move('tallies.xml', 'PinGeo/tallies.xml')
 		# shutil.move('plots.xml', 'PinGeo/plots.xml')
 
-		# openmc.run(cwd='PinGeo')
+		openmc.run(cwd='PinGeo')
 		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
 		tally = sp.get_tally(scores=['fission-q-recoverable'])
 		self.Tally = np.ndarray.flatten(tally.sum)*0.00015
@@ -227,7 +227,7 @@ class Power():
 		shutil.move('tallies.xml', 'PinGeo/tallies.xml')
 
 
-		# openmc.run(cwd='PinGeo')
+		openmc.run(cwd='PinGeo')
 		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
 		tally = sp.get_tally(scores=['fission-q-recoverable'])
 		self.Tally = np.ndarray.flatten(tally.sum)*0.00015

@@ -55,15 +55,17 @@ class Channel():
 		G = opt.G
 		A = opt.PinPitch**2-np.pi*opt.CladOR**2
 		Area = np.full(len(self.Mesh),A)
-		De_avg = 4*A/(2*np.pi*opt.CladOR+opt.PinPitch**2)
 		# Assigning smaller area at grid spacer
-		# for j in range(0,len(opt.GridTop_z)):
-		# 	for i in range(0,len(self.Mesh)):
-		# 		if self.Mesh[i] > opt.GridBot_z[j] and self.Mesh[i] <= opt.GridTop_z[j]:
-		# 			# print self.Mesh[i]
-		# 			Area[i] = opt.GridPitch**2-np.pi*opt.CladOR**2
-		# # print Area
+		for j in range(0,len(opt.GridTop_z)):
+			for i in range(0,len(self.Mesh)):
+				if self.Mesh[i] >= opt.GridBot_z[j] and self.Mesh[i] < opt.GridTop_z[j]:
+					Area[i] = opt.GridPitch**2-np.pi*opt.CladOR**2
+		# for i in range(0,len(self.Mesh)):
+		# 	print(i),
+		# 	print(self.Mesh[i]),
+		# 	print(Area[i])
 		De = 4*Area[:]/(2*np.pi*opt.CladOR+opt.PinPitch**2)
+		De_avg = sum(De)/len(De)
 		LinPower = np.zeros(len(self.Mesh)-1)
 
 		subcooled_liq = IAPWS97(T=Tin, x=0)
@@ -74,7 +76,7 @@ class Channel():
 		HeatFlux = np.zeros(len(self.Mesh)-1)
 		self.enthalpy = np.zeros(len(self.Mesh))
 		self.Tbulk = np.zeros(len(self.Mesh))
-		self.RhoBulk = np.zeros(len(self.Mesh))
+		self.RhoBulk = np.zeros(len(self.Mesh)-1)
 		self.Tw = np.zeros(len(self.Mesh))
 		self.Tw_updated = np.zeros(len(self.Mesh))
 		self.velocity = np.zeros(len(self.Mesh))
@@ -95,7 +97,7 @@ class Channel():
 				MeshStep = (self.Mesh[i]-self.Mesh[i-1])/100. # Converted to meters
 				LinPower[i-1] = PowerTally[i-1]/MeshStep
 				self.Tw[i] = self.Tw[i-1]
-				self.enthalpy[i] = LinPower[i-1]/1000.*MeshStep/(G*Area[i]) + self.enthalpy[i-1]
+				self.enthalpy[i] = LinPower[i-1]/1000.*MeshStep/(G*Area[i-1]) + self.enthalpy[i-1]
 				self.Tbulk[i] = (self.enthalpy[i]-self.enthalpy[i-1])/(liq.cp) + self.Tbulk[i-1]
 
 			liq = IAPWS97(T=self.Tbulk[i], x=0)
@@ -111,7 +113,8 @@ class Channel():
 			# Converging to Tw (wall temperature)
 			while E > 1.E-3:
 				Tw_water = IAPWS97(T=self.Tw[i], x=0)
-				HTC_nb = S*0.00122*(liq.k**0.79)*((liq.cp*1000)**0.45)*(liq.rho**0.49)/(liq.sigma**0.5)/(liq.mu**0.29)/((stm.h-liq.h)**0.24)/(stm.rho**0.24)*(abs(self.Tw[i]-Tsat)**0.24)*(abs(Tw_water.P-P)**0.75)
+				HTC_nb = S*0.00122*(liq.k**0.79)*((liq.cp*1000)**0.45)*(liq.rho**0.49)/(liq.sigma**0.5)/(
+					liq.mu**0.29)/((stm.h-liq.h)**0.24)/(stm.rho**0.24)*(abs(self.Tw[i]-Tsat)**0.24)*(abs(Tw_water.P-P)**0.75)
 				self.Tw_updated[i] = (HeatFlux[i-1]+self.Tbulk[i]*HTC_c+Tsat*HTC_nb)/(HTC_c+HTC_nb)
 				E = abs(self.Tw_updated[i]-self.Tw[i])#/self.Tw_updated[i]
 				self.Tw[i] = self.Tw_updated[i]
@@ -122,7 +125,7 @@ class Channel():
 				# Conservation equations
 				rho_top = IAPWS97(T=self.Tbulk[i], x=0).rho
 				rho_bot = IAPWS97(T=self.Tbulk[i-1], x=0).rho
-				self.RhoBulk[i] = rho_top
+				self.RhoBulk[i-1] = (rho_top+rho_bot)/2
 
 				# Mass
 				self.velocity[i] = G/rho_top
@@ -135,8 +138,8 @@ class Channel():
 				# Momentum 
 				acc = G**2*(1/rho_top-1/rho_bot)
 				f = 0.184/Re**0.2
-				fric = f*G**2/De[i]/2/((rho_top+rho_bot)/2)*MeshStep
-				grav = 9.81*(rho_top+rho_bot)/2*MeshStep
+				fric = f*G**2/De[i]/2/(self.RhoBulk[i-1]*MeshStep)
+				grav = 9.81*self.RhoBulk[i-1]*MeshStep
 				deltaP = acc + fric + grav
 				P_sum = P_sum + deltaP
 
@@ -144,7 +147,6 @@ class Channel():
 
 		rho_out = IAPWS97(T=self.Tbulk[len(self.Mesh)-1], x=0).rho
 		rho_in = subcooled_liq.rho
-		self.RhoBulk[0] = rho_in
 		self.velocity[0] = G/rho_in
 		totalP = G**2*(1/rho_out-1/rho_in) + f*G**2/De_avg/2/((rho_out+rho_in)/2)*L + 9.81*(rho_out+rho_in)/2*L 
 		# print("Total pressure change between inlet/outlet: %f [Pa]" % totalP)
@@ -155,7 +157,7 @@ class Channel():
 		# print(self.Tbulk)
 		# print("Temperature at the wall [K]:")
 		# print(self.Tw)
-		# print("Number of interations a each node:")
+		# print("Number of iterations a each node:")
 		# print(count)
 		# print("Water velocity [m/s]:")
 		# print(self.velocity)
