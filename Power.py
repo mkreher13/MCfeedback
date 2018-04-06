@@ -1,5 +1,5 @@
 # Class to provide initial linear power
-# Last modified by Miriam Rathbun on 03/05/2018
+# Last modified by Miriam Rathbun on 04/06/2018
 
 import numpy as np
 import shutil
@@ -34,7 +34,7 @@ class Power():
 		settings_file = openmc.Settings()
 		settings_file.batches = 10
 		settings_file.inactive = 5
-		settings_file.particles = 10000
+		settings_file.particles = 1000
 		settings_file.output = {'tallies': False}
 		settings_file.temperature = {'multipole': True, 'tolerance': 1000}
 		settings_file.source = openmc.source.Source(space=uniform_dist)
@@ -45,15 +45,18 @@ class Power():
 
 		# Materials file
 		uo2 = openmc.Material(material_id=1, name='UO2 fuel at 2.4% wt enrichment')
+		uo2.temperature = opt.Tin
 		uo2.set_density('g/cm3', 10.29769)
 		uo2.add_element('U', 1., enrichment=2.4)
 		uo2.add_element('O', 2.)
 
 		helium = openmc.Material(material_id=2, name='Helium for gap')
+		helium.temperature = opt.Tin
 		helium.set_density('g/cm3', 0.001598)
 		helium.add_element('He', 2.4044e-4)
 
 		zircaloy = openmc.Material(material_id=3, name='Zircaloy 4')
+		zircaloy.temperature = opt.Tin
 		zircaloy.set_density('g/cm3', 6.55)
 		zircaloy.add_element('Sn', 0.014  , 'wo')
 		zircaloy.add_element('Fe', 0.00165, 'wo')
@@ -61,11 +64,14 @@ class Power():
 		zircaloy.add_element('Zr', 0.98335, 'wo')
 
 		borated_water = openmc.Material()
+		borated_water.temperature = opt.Tin
 		borated_water.set_density('g/cm3', 0.7406)
 		borated_water.add_element('B', 4.0e-5)
 		borated_water.add_element('H', 5.0e-2)
 		borated_water.add_element('O', 2.4e-2)
 		borated_water.add_s_alpha_beta('c_H_in_H2O')
+		# borated_water = openmc.model.borated_water(boron_ppm=450,temperature=opt.Tin,pressure=15)
+
 
 		self.materials_file = openmc.Materials([uo2, helium, zircaloy, borated_water])
 		self.materials_file.export_to_xml()
@@ -178,8 +184,9 @@ class Power():
 			NewWaterMat_list.append(openmc.Material())
 		j = 0
 		for NewWater in NewWaterMat_list:
+			# NewWater = openmc.model.borated_water(boron_ppm=540.541,temperature=(Tbulk[j]+Tbulk[j+1])/2,pressure=15)
 			NewWater.set_density('g/cm3', RhoBulk[j]/1000)
-			NewWater.temperature = (Tbulk[j]+Tbulk[j+1])/2.
+			NewWater.temperature = (Tbulk[j]+Tbulk[j+1])/2
 			NewWater.add_element('B', 4.0e-5)
 			NewWater.add_element('H', 5.0e-2)
 			NewWater.add_element('O', 2.4e-2)
@@ -192,7 +199,7 @@ class Power():
 
 		j = 0
 		for fuels in self.fuel_list:
-			fuels.temperature = (Tf[j]+Tf[j+1])/2.
+			fuels.temperature = (Tf[j]+Tf[j+1])/2
 			j = j+1
 		j = 0
 		for gaps in self.gap_list:
@@ -205,6 +212,7 @@ class Power():
 		j = 0
 		for waters in self.water_list:
 			waters.fill = NewWaterMat_list[j]
+			# waters.temperature = (Tbulk[j]+Tbulk[j+1])/2
 			j = j+1
 
 		self.root.add_cells(self.fuel_list)

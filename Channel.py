@@ -1,5 +1,5 @@
 # Class to perform thermal analysis and compute heat transfer coeficient
-# Last modified by Miriam Rathbun on 03/05/2018
+# Last modified by Miriam Rathbun on 04/06/2018
 
 # Assumptions:
 # subcooled boiling at wall
@@ -43,7 +43,7 @@ class Channel():
 		x_axis = np.zeros(len(self.Mesh))
 		plt.scatter(x_axis,self.Mesh, c = "b", marker = "_")
 		plt.savefig('Mesh.png')
-		# print self.Mesh
+		plt.close()
 
 ########################################################################
 

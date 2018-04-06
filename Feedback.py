@@ -1,4 +1,4 @@
-# Last edited by Miriam Rathbun on 03/05/2018
+# Last edited by Miriam Rathbun on 04/06/2018
 # OpenMC model of fuel pin & water cell
 
 # Before running for the first time: 
@@ -7,6 +7,7 @@
 from ModelOpts import *
 from Channel import *
 from Power import *
+from Plotter import *
 import numpy as np
 
 ########################################################################
@@ -32,15 +33,16 @@ T.mesh(options)
 P=Power()
 P.initial(options, T.Mesh)
 
-
 n = 1
 for i in range(0,n):
 	T.htc(options, P.Tally)
 	P.fuel(T.Tf, T.Tgap, T.Tclad, T.Tbulk, T.Mesh, T.RhoBulk)
 
+results=Plotter()
+results.plotTemp(T.Tf, T.Tgap, T.Tclad, T.Tbulk, T.Mesh)
 
 
-# latest openmc will find the density for you 
+
 # do I still need equivalent water density in grid spacer cells?
 # couple the HTC and Fuel, using the batch-by-batch MC
 # convergence criteria: ~1K
