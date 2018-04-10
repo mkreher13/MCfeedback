@@ -1,9 +1,10 @@
 # Class to provide initial linear power
-# Last modified by Miriam Rathbun on 04/06/2018
+# Last modified by Miriam Rathbun on 04/10/2018
 
 import numpy as np
 import shutil
 import openmc
+import os
 
 class Power():
 
@@ -31,16 +32,16 @@ class Power():
 		uniform_dist = openmc.stats.Box(lower_left, upper_right, only_fissionable=True)
 
 		# Settings file
-		settings_file = openmc.Settings()
-		settings_file.batches = 10
-		settings_file.inactive = 5
-		settings_file.particles = 1000
-		settings_file.output = {'tallies': False}
-		settings_file.temperature = {'multipole': True, 'tolerance': 1000}
-		settings_file.source = openmc.source.Source(space=uniform_dist)
-		settings_file.seed = 1
+		self.settings_file = openmc.Settings()
+		self.settings_file.batches = 100
+		self.settings_file.inactive = 50
+		self.settings_file.particles = 5000
+		self.settings_file.output = {'tallies': False}
+		self.settings_file.temperature = {'multipole': True, 'tolerance': 1000}
+		self.settings_file.source = openmc.source.Source(space=uniform_dist)
+		self.settings_file.seed = 1
 
-		settings_file.export_to_xml()
+		self.settings_file.export_to_xml()
 
 
 		# Materials file
@@ -63,14 +64,14 @@ class Power():
 		zircaloy.add_element('Cr', 0.001  , 'wo')
 		zircaloy.add_element('Zr', 0.98335, 'wo')
 
-		borated_water = openmc.Material()
-		borated_water.temperature = opt.Tin
-		borated_water.set_density('g/cm3', 0.7406)
-		borated_water.add_element('B', 4.0e-5)
-		borated_water.add_element('H', 5.0e-2)
-		borated_water.add_element('O', 2.4e-2)
-		borated_water.add_s_alpha_beta('c_H_in_H2O')
-		# borated_water = openmc.model.borated_water(boron_ppm=450,temperature=opt.Tin,pressure=15)
+		# borated_water = openmc.Material()
+		# borated_water.temperature = opt.Tin
+		# borated_water.set_density('g/cm3', 0.7406)
+		# borated_water.add_element('B', 4.0e-5)
+		# borated_water.add_element('H', 5.0e-2)
+		# borated_water.add_element('O', 2.4e-2)
+		# borated_water.add_s_alpha_beta('c_H_in_H2O')
+		borated_water = openmc.model.borated_water(boron_ppm=432.473,temperature=opt.Tin,pressure=15)
 
 
 		self.materials_file = openmc.Materials([uo2, helium, zircaloy, borated_water])
@@ -137,7 +138,7 @@ class Power():
 
 
 		# Tallies
-		# power distribution: fission q recoverable (starts 0, might be data pb)
+		# power distribution: fission q recoverable (Sterling's note: starts 0, might be data pb)
 		# openmc accounts for incoming neutron energy and isotope
 		cell_filter = openmc.CellFilter(self.fuel_list)
 		t = openmc.Tally()
@@ -166,9 +167,13 @@ class Power():
 		# shutil.move('plots.xml', 'PinGeo/plots.xml')
 
 		openmc.run(cwd='PinGeo')
-		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
+		sp = openmc.StatePoint('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
 		tally = sp.get_tally(scores=['fission-q-recoverable'])
-		self.Tally = np.ndarray.flatten(tally.sum)*0.00015
+		self.Tally = np.ndarray.flatten(tally.sum)*0.000015
+		# print(self.Tally)
+		# os.remove('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
+		# os.remove('PinGeo/summary.h5')
+		# del sp
 
 
 ########################################################################
@@ -179,20 +184,19 @@ class Power():
 		print("Fuel temperature:")
 		print(Tf)
 
-		NewWaterMat_list = []
-		for i in range(0,len(Mesh)-1):
-			NewWaterMat_list.append(openmc.Material())
-		j = 0
-		for NewWater in NewWaterMat_list:
-			# NewWater = openmc.model.borated_water(boron_ppm=540.541,temperature=(Tbulk[j]+Tbulk[j+1])/2,pressure=15)
-			NewWater.set_density('g/cm3', RhoBulk[j]/1000)
-			NewWater.temperature = (Tbulk[j]+Tbulk[j+1])/2
-			NewWater.add_element('B', 4.0e-5)
-			NewWater.add_element('H', 5.0e-2)
-			NewWater.add_element('O', 2.4e-2)
-			NewWater.add_s_alpha_beta('c_H_in_H2O')
-			self.materials_file.append(NewWater)
-			j = j+1
+		# NewWaterMat_list = []
+		# for i in range(0,len(Mesh)-1):
+		# 	NewWaterMat_list.append(openmc.Material())
+		# j = 0
+		# for NewWater in NewWaterMat_list:
+		# 	NewWater.set_density('g/cm3', RhoBulk[j]/1000)
+		# 	NewWater.temperature = (Tbulk[j]+Tbulk[j+1])/2
+		# 	NewWater.add_element('B', 4.0e-5)
+		# 	NewWater.add_element('H', 5.0e-2)
+		# 	NewWater.add_element('O', 2.4e-2)
+		# 	NewWater.add_s_alpha_beta('c_H_in_H2O')
+		# 	self.materials_file.append(NewWater)
+		# 	j = j+1
 
 		self.materials_file.export_to_xml()
 		shutil.move('materials.xml', 'PinGeo/materials.xml')
@@ -211,8 +215,8 @@ class Power():
 			j = j+1
 		j = 0
 		for waters in self.water_list:
-			waters.fill = NewWaterMat_list[j]
-			# waters.temperature = (Tbulk[j]+Tbulk[j+1])/2
+			# waters.fill = NewWaterMat_list[j]
+			waters.temperature = (Tbulk[j]+Tbulk[j+1])/2
 			j = j+1
 
 		self.root.add_cells(self.fuel_list)
@@ -236,9 +240,13 @@ class Power():
 
 
 		openmc.run(cwd='PinGeo')
-		sp = openmc.StatePoint('PinGeo/statepoint.10.h5')
+		sp = openmc.StatePoint('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
 		tally = sp.get_tally(scores=['fission-q-recoverable'])
-		self.Tally = np.ndarray.flatten(tally.sum)*0.00015
+		self.Tally = np.ndarray.flatten(tally.sum)*0.000015
+		# print(self.Tally)
+		# os.remove('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
+		# os.remove('PinGeo/summary.h5')
+		# del sp
 
 
 

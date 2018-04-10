@@ -1,5 +1,5 @@
 #class to plot
-# Last modified by Miriam Rathbun on 04/06/2018
+# Last modified by Miriam Rathbun on 04/10/2018
 
 import numpy as np 
 import matplotlib.pyplot as plt
@@ -12,13 +12,14 @@ class Plotter:
 
 #################################################################### 
 
-    def plotTemp(self, Tf, Tgap, Tclad, Tbulk, Mesh):
-    	print("plotting")
+    def plotTemp(self, Tf, Tgap, Tclad, Tw, Tbulk, Mesh):
+        print("plotting")
 
-    	plt.plot(Tf,Mesh,'r')
-    	plt.plot(Tclad,Mesh,'g')
-    	plt.plot(Tbulk,Mesh,'b')
-    	plt.xlabel('T (K)')
-    	plt.ylabel('Position from start of active fuel (cm)')
-    	plt.legend(['Average Fuel Temp','Clad Temp','Bulk Water Temp'])
-    	plt.savefig('T_results.png')
+        plt.plot(Tf,Mesh,'r')
+        plt.plot(Tclad,Mesh,'g')
+        plt.plot(Tw,Mesh,'c')
+        plt.plot(Tbulk,Mesh,'b')
+        plt.xlabel('T (K)')
+        plt.ylabel('Position from start of active fuel (cm)')
+        plt.legend(['Average Fuel Temp','Clad Temp','Wall Temp','Bulk Water Temp'])
+        plt.savefig('T_results.png')

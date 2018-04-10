@@ -1,4 +1,4 @@
-# Last edited by Miriam Rathbun on 04/06/2018
+# Last edited by Miriam Rathbun on 04/10/2018
 # OpenMC model of fuel pin & water cell
 
 # Before running for the first time: 
@@ -39,7 +39,7 @@ for i in range(0,n):
 	P.fuel(T.Tf, T.Tgap, T.Tclad, T.Tbulk, T.Mesh, T.RhoBulk)
 
 results=Plotter()
-results.plotTemp(T.Tf, T.Tgap, T.Tclad, T.Tbulk, T.Mesh)
+results.plotTemp(T.Tf, T.Tgap, T.Tclad, T.Tw, T.Tbulk, T.Mesh)
 
 
 
