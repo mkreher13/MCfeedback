@@ -141,7 +141,7 @@ class Power():
 		# power distribution: fission q recoverable (Sterling's note: starts 0, might be data pb)
 		# openmc accounts for incoming neutron energy and isotope
 		cell_filter = openmc.CellFilter(self.fuel_list)
-		t = openmc.Tally()
+		t = openmc.Tally(tally_id=1)
 		t.filters.append(cell_filter)
 		t.scores = ['fission-q-recoverable']
 		tallies = openmc.Tallies([t])
@@ -178,11 +178,17 @@ class Power():
 
 ########################################################################
 
-	def fuel(self, Tf, Tgap, Tclad, Tbulk, Mesh, RhoBulk):
+	def update(self, Tf, Tgap, Tclad, Tbulk, Mesh, RhoBulk):
 
 		# Update temperatures in OpenMC
 		print("Fuel temperature:")
 		print(Tf)
+
+		self.settings_file.batches = 50
+		self.settings_file.inactive = 0
+		self.settings_file.particles = 10000
+		self.settings_file.export_to_xml()
+		shutil.move('settings.xml', 'PinGeo/settings.xml')
 
 		# NewWaterMat_list = []
 		# for i in range(0,len(Mesh)-1):
@@ -231,22 +237,25 @@ class Power():
 		# power distribution: fission q recoverable (starts 0, might be data pb)
 		# openmc accounts for incoming neutron energy and isotope
 		cell_filter = openmc.CellFilter(self.fuel_list)
-		t = openmc.Tally()
+		t = openmc.Tally(tally_id=2)
 		t.filters.append(cell_filter)
 		t.scores = ['fission-q-recoverable']
-		tallies = openmc.Tallies([t])
-		tallies.export_to_xml()
+		self.tallies = openmc.Tallies([t])
+		self.tallies.export_to_xml()
 		shutil.move('tallies.xml', 'PinGeo/tallies.xml')
 
+########################################################################
 
-		openmc.run(cwd='PinGeo')
-		sp = openmc.StatePoint('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
-		tally = sp.get_tally(scores=['fission-q-recoverable'])
-		self.Tally = np.ndarray.flatten(tally.sum)*0.000015
-		# print(self.Tally)
-		# os.remove('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
-		# os.remove('PinGeo/summary.h5')
-		# del sp
+	def power_factors(self, t):
+
+
+		self.Tally = t[2].results[:,0,1]*0.000015
+		# #openmc_tally_get_scores()
+		# print(openmc.capi.openmc_tally_results())
+
+		# sp = openmc.StatePoint('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
+		# tally = sp.get_tally(scores=['fission-q-recoverable'])
+		# self.Tally = np.ndarray.flatten(tally.sum)*0.000015
 
 
 

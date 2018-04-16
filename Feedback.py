@@ -9,6 +9,8 @@ from Channel import *
 from Power import *
 from Plotter import *
 import numpy as np
+import openmc.capi
+import os
 
 ########################################################################
 #                      Simulation Input File Parameters
@@ -33,11 +35,25 @@ T.mesh(options)
 P=Power()
 P.initial(options, T.Mesh)
 
-n = 1
+n = 100
 for i in range(0,n):
 	T.htc(options, P.Tally)
-	P.fuel(T.Tf, T.Tgap, T.Tclad, T.Tbulk, T.Mesh, T.RhoBulk)
+	P.update(T.Tf, T.Tgap, T.Tclad, T.Tbulk, T.Mesh, T.RhoBulk)
+	os.chdir('PinGeo')
+	if i == 0:
+		openmc.capi.init()
+		openmc.capi.simulation_init()
+		openmc.capi.next_batch()
+	else:
+		openmc.capi.next_batch()
+	t = openmc.capi.tallies
+	P.power_factors(t)
+	os.chdir('..')
 
+os.chdir('PinGeo')
+openmc.capi.simulation_finalize()
+openmc.capi.finalize()
+os.chdir('..')
 results=Plotter()
 results.plotTemp(T.Tf, T.Tgap, T.Tclad, T.Tw, T.Tbulk, T.Mesh)
 
