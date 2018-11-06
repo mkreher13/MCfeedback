@@ -17,6 +17,7 @@ CladIR 0.0040005     #[m]
 FuelOR 0.0039218     #[m]
 PinPitch 0.0125984   #[m]
 GridPitch 0.01221    #[m]
+ExtraCladOR 0.004896 #[m] extra cladding compensating for displacement due to grid
 
 
 # Axial specifications (beavrs_2.0.1_specs.pdf)
@@ -39,15 +40,6 @@ Active 46.482
 Grid 5.715
 Active 37.783 
 # Top is at 365.76 cm
-
-
-
-
-
-
-
-
-
 
 
 

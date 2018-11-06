@@ -68,6 +68,9 @@ class ModelOpts:
 			elif keyword == 'GridPitch':
 				self.GridPitch = float(arguments)
 
+			elif keyword == 'ExtraCladOR':
+				self.ExtraCladOR = float(arguments)
+
 			else:
 				continue
 

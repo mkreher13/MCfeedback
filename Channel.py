@@ -18,6 +18,7 @@ class Channel():
 
 	def __init__(self):
 		self
+		self.Tf_change = []
 
 ########################################################################
 
@@ -44,6 +45,11 @@ class Channel():
 		plt.scatter(x_axis,self.Mesh, c = "b", marker = "_")
 		plt.savefig('Mesh.png')
 		plt.close()
+
+		self.Ts = np.zeros(len(self.Mesh)) # Pellet surface
+		self.Tf = np.zeros(len(self.Mesh)) # Effective temperature in fuel
+		self.Tgap = np.zeros(len(self.Mesh))
+		self.Tclad = np.zeros(len(self.Mesh))
 
 ########################################################################
 
@@ -167,10 +173,10 @@ class Channel():
 		##################
 		# Fuel Temperature
 
-		self.Ts = np.zeros(len(self.Mesh)) # Pellet surface
-		self.Tf = np.zeros(len(self.Mesh)) # Effective temperature in fuel
-		self.Tgap = np.zeros(len(self.Mesh))
-		self.Tclad = np.zeros(len(self.Mesh))
+		# self.Ts = np.zeros(len(self.Mesh)) # Pellet surface
+		# self.Tf = np.zeros(len(self.Mesh)) # Effective temperature in fuel
+		# self.Tgap = np.zeros(len(self.Mesh))
+		# self.Tclad = np.zeros(len(self.Mesh))
 		kf = 2.4             #[W/m/K]
 		kc = 17.             #[W/m/K]
 		hg = 31000.          #[W/m^2/K]
@@ -193,6 +199,8 @@ class Channel():
 				self.Tf[i] = w*(self.Tw[i] + (LinPower[i]+LinPower[i-1])/2./2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
 				self.Tgap[i] = self.Tw[i] + (LinPower[i]+LinPower[i-1])/2./2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
 				self.Tclad[i] =  self.Tw[i] + (LinPower[i]+LinPower[i-1])/2./2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+
+		# print(self.Tf)
 
 		# print("Temperature in the fuel [K]:")
 		# print(self.Tf)

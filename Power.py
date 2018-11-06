@@ -1,5 +1,5 @@
 # Class to provide initial linear power
-# Last modified by Miriam Rathbun on 04/10/2018
+# Last modified by Miriam Rathbun on 10/31/2018
 
 import numpy as np
 import shutil
@@ -15,7 +15,7 @@ class Power():
 
 ########################################################################
 
-	def initial(self, opt, Mesh):
+	def initial(self, opt, Mesh): #, nthreads):
 
 		#####################################
 		# Create OpenMC geometry
@@ -24,6 +24,7 @@ class Power():
 		FuelOR = opt.FuelOR*100  #[cm]
 		CladIR = opt.CladIR*100  #[cm]
 		CladOR = opt.CladOR*100  #[cm]
+		ExtraCladOR = opt.ExtraCladOR*100 #[cm]
 		Pitch = opt.PinPitch*100 #[cm]
 
 		# Construct uniform initial source distribution over fissionable zones
@@ -35,7 +36,7 @@ class Power():
 		self.settings_file = openmc.Settings()
 		self.settings_file.batches = 100
 		self.settings_file.inactive = 50
-		self.settings_file.particles = 5000
+		self.settings_file.particles = 1000000
 		self.settings_file.output = {'tallies': False}
 		self.settings_file.temperature = {'multipole': True, 'tolerance': 1000}
 		self.settings_file.source = openmc.source.Source(space=uniform_dist)
@@ -82,6 +83,7 @@ class Power():
 		fuel_or = openmc.ZCylinder(x0=0, y0=0, R=FuelOR)
 		clad_ir = openmc.ZCylinder(x0=0, y0=0, R=CladIR)
 		clad_or = openmc.ZCylinder(x0=0, y0=0, R=CladOR)
+		extra_clad_or = openmc.ZCylinder(x0=0, y0=0, R=ExtraCladOR)
 		left = openmc.XPlane(x0=-Pitch/2)
 		right = openmc.XPlane(x0=Pitch/2)
 		back = openmc.YPlane(y0=-Pitch/2)
@@ -100,11 +102,13 @@ class Power():
 		self.fuel_list = []
 		self.gap_list = []
 		self.clad_list = []
+		self.extra_clad_list = []
 		self.water_list = []
 		for i in range(0,len(Mesh)-1):
 			self.fuel_list.append(openmc.Cell())
 			self.gap_list.append(openmc.Cell())
 			self.clad_list.append(openmc.Cell())
+			self.extra_clad_list.append(openmc.Cell())
 			self.water_list.append(openmc.Cell())
 
 		j = 0
@@ -123,8 +127,21 @@ class Power():
 			clads.fill = zircaloy
 			j = j+1
 		j = 0
+		for extra_clads in self.extra_clad_list:
+			extra_clads.region = +clad_or & -extra_clad_or & +left & -right & +back & -front & +z_list[j] & -z_list[j+1]
+			grid_flag = 0
+			for i in range(0,len(opt.GridBot_z)):
+				if z_list[j].z0 == opt.GridBot_z[i]:
+					extra_clads.fill = zircaloy
+					grid_flag = 1
+			if grid_flag == 1:
+				extra_clads.fill = zircaloy
+			else:
+				extra_clads.fill = borated_water
+			j = j+1
+		j = 0
 		for waters in self.water_list:
-			waters.region = +clad_or & +left & -right & +back & -front & +z_list[j] & -z_list[j+1]
+			waters.region = +extra_clad_or & +left & -right & +back & -front & +z_list[j] & -z_list[j+1]
 			waters.fill = borated_water
 			j = j+1
 
@@ -132,6 +149,7 @@ class Power():
 		self.root.add_cells(self.fuel_list)
 		self.root.add_cells(self.gap_list)
 		self.root.add_cells(self.clad_list)
+		self.root.add_cells(self.extra_clad_list)
 		self.root.add_cells(self.water_list)
 		self.geometry_file = openmc.Geometry(self.root)
 		self.geometry_file.export_to_xml()
@@ -150,12 +168,12 @@ class Power():
 
 		# Plots
 		plot = openmc.Plot()
-		plot.width = [Pitch+450, Pitch+450]
-		plot.origin = [0., 0., 200]
-		plot.color_by = 'cell'
+		plot.width = [Pitch, Pitch] #[Pitch+450, Pitch+450]
+		plot.origin = [0., 0., 217.8]
+		plot.color_by = 'material'
 		plot.filename = 'fuel-pin'
 		plot.pixels = [1000, 1000]
-		plot.basis = 'yz'
+		plot.basis = 'yz' 
 		# openmc.plot_inline(plot)
 
 		
@@ -166,11 +184,15 @@ class Power():
 		shutil.move('tallies.xml', 'PinGeo/tallies.xml')
 		# shutil.move('plots.xml', 'PinGeo/plots.xml')
 
-		openmc.run(cwd='PinGeo')
+		# openmc.run(cwd='PinGeo') #, threads=nthreads, mpi_args=['mpiexec','-n','2'])
 		sp = openmc.StatePoint('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
 		tally = sp.get_tally(scores=['fission-q-recoverable'])
-		self.Tally = np.ndarray.flatten(tally.sum)*0.000015
-		# print(self.Tally)
+		self.Tally = np.ndarray.flatten(tally.sum)
+		Pfactor = 66945.4/sum(np.ndarray.flatten(tally.sum))
+		# print("Pfactor: ", Pfactor)
+		self.Tally = np.ndarray.flatten(tally.sum)*Pfactor
+		# print("sum tally: ", sum(self.Tally))
+
 		# os.remove('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
 		# os.remove('PinGeo/summary.h5')
 		# del sp
@@ -181,12 +203,10 @@ class Power():
 	def update(self, Tf, Tgap, Tclad, Tbulk, Mesh, RhoBulk):
 
 		# Update temperatures in OpenMC
-		print("Fuel temperature:")
-		print(Tf)
 
-		self.settings_file.batches = 50
+		self.settings_file.batches = 100
 		self.settings_file.inactive = 0
-		self.settings_file.particles = 10000
+		self.settings_file.particles = 1000000
 		self.settings_file.export_to_xml()
 		shutil.move('settings.xml', 'PinGeo/settings.xml')
 
@@ -247,15 +267,29 @@ class Power():
 ########################################################################
 
 	def power_factors(self, t):
+		
+		Pfactor = 66945.4/sum(t[2].results[:,0,1])
+		# print("Pfactor: ", Pfactor)
+		self.Tally = t[2].results[:,0,1]*Pfactor
 
-
-		self.Tally = t[2].results[:,0,1]*0.000015
+		# print("sum tally: ", sum(self.Tally))
+		# print(t[2].results[:,0,1])
 		# #openmc_tally_get_scores()
 		# print(openmc.capi.openmc_tally_results())
 
 		# sp = openmc.StatePoint('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
 		# tally = sp.get_tally(scores=['fission-q-recoverable'])
 		# self.Tally = np.ndarray.flatten(tally.sum)*0.000015
+
+	def finalize(self):
+
+		sp = openmc.StatePoint('PinGeo/statepoint.'+str(self.settings_file.batches)+'.h5')
+		k = sp.k_generation
+		print(k)
+
+
+
+
 
 
 
