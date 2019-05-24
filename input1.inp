@@ -2,43 +2,57 @@
 # Channel Parameters: Appendix K of Trodreas
 #################################################
 
-MaxMesh 10.          #[cm]   
+MaxMesh 10.16        #[cm]   
 Tin 566.25           #[K]
 Pressure 15.51       #[MPa]
-MassFlux 3807.       #[kg/m2/s]
+MassFlux 4299.       #[kg/m2/s]
+
+
+#################################################
+# Geometry: Gill Paper
+#################################################
+
+CladOR 0.005588      #[m]
+CladIR 0.0049275     #[m]
+FuelOR 0.0049275     #[m]
+PinPitch 0.014732    #[m]
+GridPitch 0.0125984   #0.01221    #[m]
+ExtraCladOR 0.004572  #0.004896 #[m] extra cladding compensating for displacement due to grid
 
 
 #################################################
 # Geometry: BEAVRS Benchmark
 #################################################
 
-CladOR 0.004572      #[m]
-CladIR 0.0040005     #[m]
-FuelOR 0.0039218     #[m]
-PinPitch 0.0125984   #[m]
-GridPitch 0.01221    #[m]
-ExtraCladOR 0.004896 #[m] extra cladding compensating for displacement due to grid
+#CladOR 0.004572      #[m]
+#CladIR 0.0040005     #[m]
+#FuelOR 0.0039218     #[m]
+#PinPitch 0.0125984   #[m]
+#GridPitch 0.0125984   #0.01221    #[m]
+#ExtraCladOR 0.004572  #0.004896 #[m] extra cladding compensating for displacement due to grid
 
 
 # Axial specifications (beavrs_2.0.1_specs.pdf)
 # Lengths in cm
 
+Active 365.76
+
 # Bottom is at 0 cm
-Active 0.4141 
-Grid 3.3579
-Active 57.505
-Grid 5.715
-Active 46.482
-Grid 5.715
-Active 46.482
-Grid 5.715
-Active 46.482
-Grid 5.715
-Active 46.482
-Grid 5.715
-Active 46.482
-Grid 5.715
-Active 37.783 
+# Active 0.4141 
+# Grid 3.3579
+# Active 57.505
+# Grid 5.715
+# Active 46.482
+# Grid 5.715
+# Active 46.482
+# Grid 5.715
+# Active 46.482
+# Grid 5.715
+# Active 46.482
+# Grid 5.715
+# Active 46.482
+# Grid 5.715
+# Active 37.783 
 # Top is at 365.76 cm
 
 

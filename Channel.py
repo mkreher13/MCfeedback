@@ -1,5 +1,5 @@
 # Class to perform thermal analysis and compute heat transfer coeficient
-# Last modified by Miriam Rathbun on 04/10/2018
+# Last modified by Miriam Kreher on 11/06/2018
 
 # Assumptions:
 # subcooled boiling at wall
@@ -19,6 +19,7 @@ class Channel():
 	def __init__(self):
 		self
 		self.Tf_change = []
+		self.LP_change = []
 
 ########################################################################
 
@@ -41,15 +42,16 @@ class Channel():
 				UnifMesh3 = np.delete(UnifMesh2,len(UnifMesh2)-1)
 				self.Mesh = sorted(np.insert(self.Mesh,0,UnifMesh3))
 
-		x_axis = np.zeros(len(self.Mesh))
-		plt.scatter(x_axis,self.Mesh, c = "b", marker = "_")
-		plt.savefig('Mesh.png')
-		plt.close()
+		# x_axis = np.zeros(len(self.Mesh))
+		# plt.scatter(x_axis,self.Mesh, c = "b", marker = "_")
+		# plt.savefig('Mesh.png')
+		# plt.close()
 
 		self.Ts = np.zeros(len(self.Mesh)) # Pellet surface
 		self.Tf = np.zeros(len(self.Mesh)) # Effective temperature in fuel
-		self.Tgap = np.zeros(len(self.Mesh))
+		# self.Tgap = np.zeros(len(self.Mesh))
 		self.Tclad = np.zeros(len(self.Mesh))
+		self.LinPower = np.zeros(len(self.Mesh)-1)
 
 ########################################################################
 
@@ -72,7 +74,6 @@ class Channel():
 		# 	print(Area[i])
 		De = 4*Area[:]/(2*np.pi*opt.CladOR+opt.PinPitch**2)
 		De_avg = sum(De)/len(De)
-		LinPower = np.zeros(len(self.Mesh)-1)
 
 		subcooled_liq = IAPWS97(T=Tin, x=0)
 		sat_liq = IAPWS97(P=P, x=0)
@@ -101,9 +102,9 @@ class Channel():
 				self.Tw[i] = Tin
 			else:
 				MeshStep = (self.Mesh[i]-self.Mesh[i-1])/100. # Converted to meters
-				LinPower[i-1] = PowerTally[i-1]/MeshStep
+				self.LinPower[i-1] = PowerTally[i-1]/MeshStep
 				self.Tw[i] = self.Tw[i-1]
-				self.enthalpy[i] = LinPower[i-1]/1000.*MeshStep/(G*Area[i-1]) + self.enthalpy[i-1]
+				self.enthalpy[i] = self.LinPower[i-1]/1000.*MeshStep/(G*Area[i-1]) + self.enthalpy[i-1]
 				self.Tbulk[i] = (self.enthalpy[i]-self.enthalpy[i-1])/(liq.cp) + self.Tbulk[i-1]
 
 			liq = IAPWS97(T=self.Tbulk[i], x=0)
@@ -113,7 +114,7 @@ class Channel():
 			Nu = 0.023*(Re**0.8)*(Pr**0.4)
 			HTC_c = Nu*liq.k/De[i]
 			S = 1/(1.+2.53E-6*Re**1.17)
-			HeatFlux[i-1] = LinPower[i-1]/(2*np.pi*opt.CladOR)
+			HeatFlux[i-1] = self.LinPower[i-1]/(2*np.pi*opt.CladOR)
 
 
 			# Converging to Tw (wall temperature)
@@ -138,7 +139,7 @@ class Channel():
 
 				# Energy - used to calculate enthaply, so no need to check. 
 				# a = G*(self.enthalpy[i]-self.enthalpy[i-1])/MeshStep
-				# b = LinPower[i]/1000/Area[i]
+				# b = self.LinPower[i]/1000/Area[i]
 				# print a-b
 
 				# Momentum 
@@ -177,28 +178,46 @@ class Channel():
 		# self.Tf = np.zeros(len(self.Mesh)) # Effective temperature in fuel
 		# self.Tgap = np.zeros(len(self.Mesh))
 		# self.Tclad = np.zeros(len(self.Mesh))
-		kf = 2.4             #[W/m/K]
-		kc = 17.             #[W/m/K]
+		kf = 1.5 #2.4             #[W/m/K]
+		kc = 7.4973             #[W/m/K] 17. originally
 		hg = 31000.          #[W/m^2/K]
 		w = 0.92
 
 
+		# for i in range(0,len(self.Mesh)):
+		# 	if i == 0:
+		# 		self.Ts[i] = self.Tw[i] + self.LinPower[i]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 		self.Tf[i] = w*(self.Tw[i] + self.LinPower[i]/2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
+		# 		self.Tgap[i] = self.Tw[i] + self.LinPower[i]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 		self.Tclad[i] =  self.Tw[i] + self.LinPower[i]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 	elif i == len(self.Mesh)-1:
+		# 		self.Ts[i] = self.Tw[i] + self.LinPower[i-1]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 		self.Tf[i] = w*(self.Tw[i] + self.LinPower[i-1]/2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
+		# 		self.Tgap[i] = self.Tw[i] + self.LinPower[i-1]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 		self.Tclad[i] =  self.Tw[i] + self.LinPower[i-1]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 	else:
+		# 		self.Ts[i] = self.Tw[i] + (self.LinPower[i]+self.LinPower[i-1])/2./2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 		self.Tf[i] = w*(self.Tw[i] + (self.LinPower[i]+self.LinPower[i-1])/2./2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
+		# 		self.Tgap[i] = self.Tw[i] + (self.LinPower[i]+self.LinPower[i-1])/2./2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
+		# 		self.Tclad[i] =  self.Tw[i] + (self.LinPower[i]+self.LinPower[i-1])/2./2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+
+
+		#No gap modeled:
 		for i in range(0,len(self.Mesh)):
 			if i == 0:
-				self.Ts[i] = self.Tw[i] + LinPower[i]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
-				self.Tf[i] = w*(self.Tw[i] + LinPower[i]/2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
-				self.Tgap[i] = self.Tw[i] + LinPower[i]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
-				self.Tclad[i] =  self.Tw[i] + LinPower[i]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+				self.Ts[i] = self.Tw[i] + self.LinPower[i]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+				self.Tf[i] = w*(self.Tw[i] + self.LinPower[i]/2.0/np.pi*(1.0/4.0/kf+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
+				self.Tclad[i] =  self.Tw[i] + self.LinPower[i]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
 			elif i == len(self.Mesh)-1:
-				self.Ts[i] = self.Tw[i] + LinPower[i-1]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
-				self.Tf[i] = w*(self.Tw[i] + LinPower[i-1]/2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
-				self.Tgap[i] = self.Tw[i] + LinPower[i-1]/2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
-				self.Tclad[i] =  self.Tw[i] + LinPower[i-1]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+				self.Ts[i] = self.Tw[i] + self.LinPower[i-1]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+				self.Tf[i] = w*(self.Tw[i] + self.LinPower[i-1]/2.0/np.pi*(1.0/4.0/kf+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
+				self.Tclad[i] =  self.Tw[i] + self.LinPower[i-1]/2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
 			else:
-				self.Ts[i] = self.Tw[i] + (LinPower[i]+LinPower[i-1])/2./2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
-				self.Tf[i] = w*(self.Tw[i] + (LinPower[i]+LinPower[i-1])/2./2.0/np.pi*(1.0/4.0/kf+1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
-				self.Tgap[i] = self.Tw[i] + (LinPower[i]+LinPower[i-1])/2./2.0/np.pi*(1/opt.GapR/hg+1/kc*np.log(opt.CladOR/opt.CladIR))
-				self.Tclad[i] =  self.Tw[i] + (LinPower[i]+LinPower[i-1])/2./2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+				self.Ts[i] = self.Tw[i] + (self.LinPower[i]+self.LinPower[i-1])/2./2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+				self.Tf[i] = w*(self.Tw[i] + (self.LinPower[i]+self.LinPower[i-1])/2./2.0/np.pi*(1.0/4.0/kf+1/kc*np.log(opt.CladOR/opt.CladIR))) + (1-w)*self.Ts[i]
+				self.Tclad[i] =  self.Tw[i] + (self.LinPower[i]+self.LinPower[i-1])/2./2.0/np.pi*(1/kc*np.log(opt.CladOR/opt.CladIR))
+
+
 
 		# print(self.Tf)
 

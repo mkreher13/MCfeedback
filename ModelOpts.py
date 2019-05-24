@@ -1,5 +1,5 @@
 # Parsing input file
-# Last edited by Miriam Rathbun on 02/27/2018
+# Last edited by Miriam Kreher on 11/06/2018
 
 import numpy as np
 
